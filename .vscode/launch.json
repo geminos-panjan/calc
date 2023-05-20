@@ -9,8 +9,9 @@
       "request": "launch",
       "name": "プログラムの起動",
       "skipFiles": ["<node_internals>/**"],
-      "outFiles": ["${workspaceFolder}/**/*.js"],
-      "args": ["${file}"]
+      "program": "${file}",
+      "runtimeExecutable": "ts-node",
+      "runtimeArgs": ["--esm"]
     }
   ]
 }

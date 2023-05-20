@@ -5,7 +5,7 @@ test.each([
   { exp: "10 - 5 - 3", res: 2 },
   { exp: "2 * (1 + (5 - 3) * 4)", res: 18 },
   { exp: "-1", res: -1 },
-  { exp: "2 ^ 2 * pi()", res: 4 * Math.PI },
+  { exp: "2 ^ 2 * pi", res: 4 * Math.PI },
   { exp: "-sum(1, 3, 2 * (6 - 4))", res: -8 },
   { exp: "sum(-1, -3, 2 * -(6 - 4))", res: -8 },
   { exp: "5 * pi / (-sum(1, 3, 2 * (6 - 4)))", res: (5 * Math.PI) / -8 },

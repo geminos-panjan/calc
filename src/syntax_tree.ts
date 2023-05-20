@@ -238,15 +238,25 @@ const createSyntaxTree = () => {
 
 export const calculate = (str: string) => {
   g_tlPos = 0;
+  let lpare = 0;
+  let rpare = 0;
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (c === o.L_PARE) lpare++;
+    if (c === o.R_PARE) rpare++;
+  }
+  if (lpare < rpare) {
+    str = str.padStart(str.length + rpare - lpare, o.L_PARE);
+  }
   const tl = createTokenList(str);
   g_tokenList = tl;
   if (tl.length < 1) {
     throw InvalidTokenError("", 0);
   }
   const node = createSyntaxTree();
-  // if (g_tlPos < g_tokenList.length) {
-  //   throw UnexpectedTokenError(tl[tl.length - 1]);
-  // }
+  if (g_tlPos < g_tokenList.length) {
+    throw UnexpectedTokenError(tl[tl.length - 1]);
+  }
   // dumpTokenDot(tl);
   // dumpNodeDot(node);
   // console.log(node);
