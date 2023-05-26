@@ -26,8 +26,20 @@ export const alters: { [key: string]: Alter } = {
     minNodes: 2,
     maxNodes: 2,
     func: (n) => {
+      if (n[1].value === 2) {
+        return alters.bin.func(n);
+      }
+      if (n[1].value === 10) {
+        return alters.dec.func(n);
+      }
+      if (n[1].value === 16) {
+        return alters.hex.func(n);
+      }
+      if (n[1].value < 2 || 64 < n[1].value) {
+        throw InvalidArgsError([n[1]]);
+      }
       return (
-        "(" + convertBase(n[0].value, n[1].value) + ")base" + String(n[1].value)
+        convertBase(n[0].value, n[1].value) + "(" + String(n[1].value + ")")
       );
     },
     description: ["cvtbase(n, m)", "nをm進数に変換"],

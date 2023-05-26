@@ -58,7 +58,7 @@ const NumberToken = (str: string, start: number, end: number) => {
   } else {
     const num = Number(str);
     if (isNaN(num)) {
-      console.log(str, num);
+      // console.log(str, num);
       throw InvalidTokenError(str, start);
     }
     const token = createToken(tk.NUMBER, str, start, end);
