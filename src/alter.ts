@@ -1,4 +1,5 @@
-import { convertBase } from "./base_conversion.js";
+import { bin, convertBase, hex } from "./base_conversion.js";
+import { hsl2rgb, rgb2hsl } from "./color.js";
 import { InvalidArgsError } from "./error.js";
 import { PrimeFactorFormula } from "./prime_factor.js";
 import { Node } from "./syntax_tree.js";
@@ -56,7 +57,7 @@ export const alters: { [key: string]: Alter } = {
     minNodes: 1,
     maxNodes: 1,
     func: (n) => {
-      return "0x" + convertBase(n[0].value, 16);
+      return "0x" + hex(n[0].value);
     },
     description: ["hex(n)", "nを十六進数に変換"],
   },
@@ -64,9 +65,57 @@ export const alters: { [key: string]: Alter } = {
     minNodes: 1,
     maxNodes: 1,
     func: (n) => {
-      const bin = convertBase(n[0].value, 2);
-      return "0b" + bin.padStart(Math.ceil(bin.length / 4) * 4, "0");
+      return "0b" + bin(n[0].value);
     },
     description: ["bin(n)", "nを二進数に変換"],
+  },
+  rgb2hsl: {
+    minNodes: 1,
+    maxNodes: 3,
+    func: (n) => {
+      if (n.length === 2) {
+        throw InvalidArgsError(n);
+      }
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      if (n.length === 1) {
+        r = (n[0].value >> 16) & 0xff;
+        g = (n[0].value >> 8) & 0xff;
+        b = (n[0].value >> 0) & 0xff;
+      } else if (n.length === 3) {
+        r = n[0].value;
+        g = n[1].value;
+        b = n[2].value;
+      }
+      const hsl = rgb2hsl(r, g, b);
+      return `hsl(${hsl.h}deg, ${hsl.s}%, ${hsl.l}%)`;
+    },
+    description: [
+      "1. rgb2hsl(rgb)",
+      "rgbをhslに変換",
+      "2. rgb2hsl(r, g, b)",
+      "r, g, bをhslに変換",
+    ],
+  },
+  hsl2rgb: {
+    minNodes: 3,
+    maxNodes: 3,
+    func: (n) => {
+      let h = n[0].value;
+      let s = n[1].value;
+      let l = n[2].value;
+      const rgb = hsl2rgb(h, s, l);
+      const r = hex(Math.floor(rgb.r));
+      const g = hex(Math.floor(rgb.g));
+      const b = hex(Math.floor(rgb.b));
+      return "#" + r + g + b;
+    },
+    description: [
+      "1. hsl2rgb(hsl)",
+      "hslをrgbに変換",
+      "2. hsl2rgb(h, s, l)",
+      "h, s, lをrgbに変換",
+    ],
   },
 };
