@@ -1,3 +1,4 @@
+import { alters } from "./alter.js";
 import { constants } from "./constant.js";
 import { InvalidTokenError } from "./error.js";
 import { funcs } from "./func.js";
@@ -13,7 +14,7 @@ export const TokenType = Object.freeze({
   NUMBER: 0,
   OPERATOR: 1,
   CONSTANT: 2,
-  VARIABLE: 3,
+  ALTER: 3,
   FUNC: 4,
 });
 
@@ -43,6 +44,10 @@ const isConstant = (c: string) => {
   return c in constants;
 };
 
+const isAlter = (c: string) => {
+  return c in alters;
+};
+
 const isFunc = (c: string) => {
   return c in funcs;
 };
@@ -53,6 +58,7 @@ const NumberToken = (str: string, start: number, end: number) => {
   } else {
     const num = Number(str);
     if (isNaN(num)) {
+      console.log(str, num);
       throw InvalidTokenError(str, start);
     }
     const token = createToken(tk.NUMBER, str, start, end);
@@ -84,10 +90,22 @@ const ConstantToken = (c: string, start: number, end: number) => {
   }
 };
 
-const FuncToken = (c: string, start: number, end: number) => {
+const AlterToken = (c: string, start: number, end: number) => {
   const Const = ConstantToken(c, start, end);
   if (Const !== false) {
     return Const;
+  } else if (!isAlter(c)) {
+    return false;
+  } else {
+    const token = createToken(tk.ALTER, c, start, end);
+    return token;
+  }
+};
+
+const FuncToken = (c: string, start: number, end: number) => {
+  const Alter = AlterToken(c, start, end);
+  if (Alter !== false) {
+    return Alter;
   } else if (!isFunc(c)) {
     return false;
   } else {

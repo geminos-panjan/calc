@@ -1,6 +1,7 @@
+// import { convertBase } from "./base_conversion.js";
 import { formatDate } from "./date.js";
 import { Info, InvalidArgsError, ZeroDivisionError } from "./error.js";
-import { PrimeFactorFormula } from "./prime_factor.js";
+// import { PrimeFactorFormula } from "./prime_factor.js";
 import { Node } from "./syntax_tree.js";
 
 type Func = {
@@ -74,17 +75,6 @@ export const funcs: { [key: string]: Func } = {
       "3. rand(n, m)",
       "n以上m未満のランダムな整数",
     ],
-  },
-  prime: {
-    minNodes: 1,
-    maxNodes: 1,
-    func: (n) => {
-      if (n[0].value < 2) {
-        throw InvalidArgsError(n);
-      }
-      throw new Info(PrimeFactorFormula(n[0].value));
-    },
-    description: ["prime(n)", "nの素因数分解"],
   },
   date: {
     minNodes: 0,

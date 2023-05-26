@@ -1,10 +1,12 @@
+import { alters } from "./alter.js";
 import { constants } from "./constant.js";
 import {
   UnexpectedTokenError,
-  NotClosedPareError,
+  // NotClosedPareError,
   InvalidTokenError,
   UnexpectedEndError,
   InvalidArgsError,
+  // Info,
 } from "./error.js";
 import { funcs } from "./func.js";
 import { addOpr, mulOpr, Operators as o, signOpr } from "./operator.js";
@@ -24,6 +26,7 @@ export type Node = {
   value: number;
   start: number;
   end: number;
+  display: string;
   children: Node[];
 };
 
@@ -32,6 +35,7 @@ const createNode = (
   value: number,
   start: number,
   end: number,
+  display: string,
   children: Node[] = []
 ) => {
   return {
@@ -39,6 +43,7 @@ const createNode = (
     value: value,
     start: start,
     end: end,
+    display: display,
     children: children,
   } as Node;
 };
@@ -57,7 +62,7 @@ const Num = () => {
     return false;
   }
   g_tlPos++;
-  const node = createNode(t.value, Number(t.value), t.start, t.end);
+  const node = createNode(t.value, Number(t.value), t.start, t.end, t.value);
   return node;
 };
 
@@ -75,13 +80,77 @@ const Constant = () => {
     t.value,
     constants[t.value].value,
     t.start,
-    t.end
+    t.end,
+    t.value
   );
   return Constant;
 };
 
-const Func = () => {
+const Alter = () => {
   let node = Constant();
+  if (node !== false) {
+    return node;
+  }
+  let t = currentToken();
+  if (t === false || t.type !== tk.ALTER) {
+    return false;
+  }
+  const start = t.start;
+  let end = t.end;
+  const alter = t.value;
+  g_tlPos++;
+  t = currentToken();
+  if (t === false) {
+    throw UnexpectedEndError(end);
+  }
+  if (t.value !== o.L_PARE) {
+    throw UnexpectedTokenError(t);
+  }
+  g_tlPos++;
+  end = t.end;
+  const args: Node[] = [];
+  let arg = {} as Node;
+  while (true) {
+    t = currentToken();
+    if (t === false) {
+      break;
+    }
+    if (t.value === o.R_PARE) {
+      g_tlPos++;
+      break;
+    }
+    if (t.value === o.COMMA) {
+      g_tlPos++;
+      continue;
+    }
+    arg = Adder();
+    args.push(arg);
+    end = arg.end;
+  }
+  const f = alters[alter];
+  if (f.minNodes !== null && args.length < f.minNodes) {
+    if (args.length < 1) {
+      throw InvalidArgsError([createNode("", 0, start, end, "")]);
+    }
+    throw InvalidArgsError(args);
+  }
+  if (f.maxNodes !== null && f.maxNodes < args.length) {
+    throw InvalidArgsError(args.slice(f.maxNodes));
+  }
+  const display = alters[alter].func(args);
+  arg = createNode(
+    sliceFormula(start, end),
+    args[0].value,
+    start,
+    end,
+    display,
+    args
+  );
+  return arg;
+};
+
+const Func = () => {
+  let node = Alter();
   if (node !== false) {
     return node;
   }
@@ -124,7 +193,7 @@ const Func = () => {
   const f = funcs[func];
   if (f.minNodes !== null && args.length < f.minNodes) {
     if (args.length < 1) {
-      throw InvalidArgsError([createNode("", 0, start, end)]);
+      throw InvalidArgsError([createNode("", 0, start, end, "")]);
     }
     throw InvalidArgsError(args);
   }
@@ -132,7 +201,14 @@ const Func = () => {
     throw InvalidArgsError(args.slice(f.maxNodes));
   }
   const value = funcs[func].func(args);
-  arg = createNode(sliceFormula(start, end), value, start, end, args);
+  arg = createNode(
+    sliceFormula(start, end),
+    value,
+    start,
+    end,
+    String(value),
+    args
+  );
   return arg;
 };
 
@@ -157,6 +233,7 @@ const Pare = (): false | Node => {
       child.value,
       start,
       child.end,
+      child.display,
       [child]
     );
     return node;
@@ -164,9 +241,14 @@ const Pare = (): false | Node => {
   if (t.value !== o.R_PARE) {
     throw UnexpectedTokenError(t);
   }
-  node = createNode(sliceFormula(start, t.end), child.value, start, t.end, [
-    child,
-  ]);
+  node = createNode(
+    sliceFormula(start, t.end),
+    child.value,
+    start,
+    t.end,
+    child.display,
+    [child]
+  );
   return node;
 };
 
@@ -190,9 +272,14 @@ const Sign = () => {
     throw UnexpectedEndError(end);
   }
   const value = signOpr[opr](node);
-  node = createNode(sliceFormula(start, node.end), value, start, node.end, [
-    node,
-  ]);
+  node = createNode(
+    sliceFormula(start, node.end),
+    value,
+    start,
+    node.end,
+    opr + node.display,
+    [node]
+  );
   return node;
 };
 
@@ -207,10 +294,14 @@ const Factor = () => {
     g_tlPos++;
     const child = Sign();
     const value = mulOpr[t.value](node, child);
-    node = createNode(sliceFormula(start, child.end), value, start, child.end, [
-      node,
-      child,
-    ]);
+    node = createNode(
+      sliceFormula(start, child.end),
+      value,
+      start,
+      child.end,
+      String(value),
+      [node, child]
+    );
   }
 };
 
@@ -225,10 +316,14 @@ const Adder = () => {
     g_tlPos++;
     const child = Factor();
     const value = addOpr[t.value](node, child);
-    node = createNode(sliceFormula(start, child.end), value, start, child.end, [
-      node,
-      child,
-    ]);
+    node = createNode(
+      sliceFormula(start, child.end),
+      value,
+      start,
+      child.end,
+      String(value),
+      [node, child]
+    );
   }
 };
 
@@ -261,5 +356,5 @@ export const calculate = (str: string) => {
   // dumpNodeDot(node);
   // console.log(node);
   // console.log(node.formula);
-  return node.value;
+  return node.display;
 };
