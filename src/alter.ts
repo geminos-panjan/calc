@@ -32,6 +32,14 @@ export const alters: { [key: string]: Alter } = {
     },
     description: ["cvtbase(n, m)", "nをm進数に変換"],
   },
+  dec: {
+    minNodes: 1,
+    maxNodes: 1,
+    func: (n) => {
+      return String(n[0].value);
+    },
+    description: ["dec(n)", "nを十進数に変換"],
+  },
   hex: {
     minNodes: 1,
     maxNodes: 1,
