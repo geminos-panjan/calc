@@ -1,360 +1,413 @@
 import { alters } from "./alter.js";
 import { constants } from "./constant.js";
 import {
-  UnexpectedTokenError,
-  // NotClosedPareError,
+  InvalidArgsError,
   InvalidTokenError,
   UnexpectedEndError,
-  InvalidArgsError,
-  // Info,
+  UnexpectedTokenError,
+  ZeroDivisionError,
 } from "./error.js";
 import { funcs } from "./func.js";
-import { addOpr, mulOpr, Operators as o, signOpr } from "./operator.js";
 import {
-  createTokenList,
-  sliceFormula,
+  exponentOperator,
+  factorOperators,
+  signOperators,
+  termOperators,
+} from "./operator.js";
+import {
   Token,
-  TokenType as tk,
+  TokenType,
+  createTokenList,
+  tokenTypes as tt,
 } from "./token.js";
-// import { dumpNodeDot, dumpTokenDot } from "../test/dot.js";
 
-let g_tlPos = 0;
-let g_tokenList: Token[] = [];
+const nodeTypes = {
+  EXPRESSION: "EXPRESSION",
+  TERM: "TERM",
+  FACTOR: "FACTOR",
+  EXPONENT: "EXPONENT",
+  FUNCTION: "FUNCTION",
+  ARGUMENT: "ARGUMENT",
+  CONSTANT: "CONSTANT",
+  NUMBER: "NUMBER",
+} as const;
+const nt = nodeTypes;
+type NodeType = (typeof nt)[keyof typeof nt];
 
-export type Node = {
-  formula: string;
-  value: number;
-  start: number;
-  end: number;
-  display: string;
-  children: Node[];
-};
+class Node {
+  type;
+  value;
+  tokens;
+  children;
 
-const createNode = (
-  formula: string,
-  value: number,
-  start: number,
-  end: number,
-  display: string,
-  children: Node[] = []
-) => {
-  return {
-    formula: formula,
-    value: value,
-    start: start,
-    end: end,
-    display: display,
-    children: children,
-  } as Node;
-};
-
-const currentToken = () => {
-  if (g_tokenList.length <= g_tlPos) {
-    return false;
+  constructor(
+    type: NodeType,
+    value: number = 0,
+    tokens: Token[] = [],
+    children: Node[] = []
+  ) {
+    this.type = type;
+    this.value = value;
+    this.tokens = tokens;
+    this.children = children;
   }
-  const t = g_tokenList[g_tlPos];
-  return t;
-};
+}
 
-const Num = () => {
-  const t = currentToken();
-  if (t === false || t.type !== tk.NUMBER) {
-    return false;
+class ParseResult {
+  tokens;
+  node;
+  constructor(tokens: Token[], node: Node) {
+    this.tokens = tokens;
+    this.node = node;
   }
-  g_tlPos++;
-  const node = createNode(t.value, Number(t.value), t.start, t.end, t.value);
-  return node;
-};
+}
 
-const Constant = () => {
-  let node = Num();
-  if (node !== false) {
-    return node;
+const parseNumber = (tokens: Token[]) => {
+  const numberTypes = [tt.BINARY, tt.HEX, tt.FLOAT, tt.INTEGER];
+  if (!(numberTypes as string[]).includes(tokens[0].type)) {
+    return undefined;
   }
-  let t = currentToken();
-  if (t === false || t.type !== tk.CONSTANT) {
-    return false;
+  const value = Number(tokens[0].word);
+  if (isNaN(value)) {
+    throw new InvalidTokenError(`"${tokens[0].word}" is NaN`);
   }
-  g_tlPos++;
-  const Constant = createNode(
-    t.value,
-    constants[t.value].value,
-    t.start,
-    t.end,
-    t.value
+  return new ParseResult(
+    tokens.slice(1),
+    new Node(nt.NUMBER, value, [tokens[0]])
   );
-  return Constant;
 };
 
-const Alter = () => {
-  let node = Constant();
-  if (node !== false) {
-    return node;
-  }
-  let t = currentToken();
-  if (t === false || t.type !== tk.ALTER) {
-    return false;
-  }
-  const start = t.start;
-  let end = t.end;
-  const alter = t.value;
-  g_tlPos++;
-  t = currentToken();
-  if (t === false) {
-    throw UnexpectedEndError(end);
-  }
-  if (t.value !== o.L_PARE) {
-    throw UnexpectedTokenError(t);
-  }
-  g_tlPos++;
-  end = t.end;
-  const args: Node[] = [];
-  let arg = {} as Node;
-  while (true) {
-    t = currentToken();
-    if (t === false) {
-      break;
+const parseArgument = (
+  tokens: Token[],
+  node?: Node
+): ParseResult | undefined => {
+  if (node === undefined) {
+    if (!(0 in tokens)) {
+      return undefined;
     }
-    if (t.value === o.R_PARE) {
-      g_tlPos++;
-      break;
+    const res = parseExpression(tokens);
+    if (res === undefined) {
+      throw new UnexpectedTokenError(`"${tokens[0].word}"`);
     }
-    if (t.value === o.COMMA) {
-      g_tlPos++;
-      continue;
-    }
-    arg = Adder();
-    args.push(arg);
-    end = arg.end;
-  }
-  const f = alters[alter];
-  if (f.minNodes !== null && args.length < f.minNodes) {
-    if (args.length < 1) {
-      throw InvalidArgsError([createNode("", 0, start, end, "")]);
-    }
-    throw InvalidArgsError(args);
-  }
-  if (f.maxNodes !== null && f.maxNodes < args.length) {
-    throw InvalidArgsError(args.slice(f.maxNodes));
-  }
-  const display = alters[alter].func(args);
-  arg = createNode(
-    sliceFormula(start, end),
-    args[0].value,
-    start,
-    end,
-    display,
-    args
-  );
-  return arg;
-};
-
-const Func = () => {
-  let node = Alter();
-  if (node !== false) {
-    return node;
-  }
-  let t = currentToken();
-  if (t === false || t.type !== tk.FUNC) {
-    return false;
-  }
-  const start = t.start;
-  let end = t.end;
-  const func = t.value;
-  g_tlPos++;
-  t = currentToken();
-  if (t === false) {
-    throw UnexpectedEndError(end);
-  }
-  if (t.value !== o.L_PARE) {
-    throw UnexpectedTokenError(t);
-  }
-  g_tlPos++;
-  end = t.end;
-  const args: Node[] = [];
-  let arg = {} as Node;
-  while (true) {
-    t = currentToken();
-    if (t === false) {
-      break;
-    }
-    if (t.value === o.R_PARE) {
-      g_tlPos++;
-      break;
-    }
-    if (t.value === o.COMMA) {
-      g_tlPos++;
-      continue;
-    }
-    arg = Adder();
-    args.push(arg);
-    end = arg.end;
-  }
-  const f = funcs[func];
-  if (f.minNodes !== null && args.length < f.minNodes) {
-    if (args.length < 1) {
-      throw InvalidArgsError([createNode("", 0, start, end, "")]);
-    }
-    throw InvalidArgsError(args);
-  }
-  if (f.maxNodes !== null && f.maxNodes < args.length) {
-    throw InvalidArgsError(args.slice(f.maxNodes));
-  }
-  const value = funcs[func].func(args);
-  arg = createNode(
-    sliceFormula(start, end),
-    value,
-    start,
-    end,
-    String(value),
-    args
-  );
-  return arg;
-};
-
-const Pare = (): false | Node => {
-  let node = Func();
-  if (node !== false) {
-    return node;
-  }
-  let t = currentToken();
-  if (t === false || t.value !== o.L_PARE) {
-    return false;
-  }
-  const start = t.start;
-  g_tlPos++;
-  const child = Adder();
-  t = currentToken();
-  g_tlPos++;
-  if (t === false) {
-    // throw NotClosedPareError(start);
-    node = createNode(
-      sliceFormula(start, child.end),
-      child.value,
-      start,
-      child.end,
-      child.display,
-      [child]
+    return parseArgument(
+      res.tokens,
+      new Node(nt.ARGUMENT, NaN, [tokens[0]], [res.node])
     );
-    return node;
   }
-  if (t.value !== o.R_PARE) {
-    throw UnexpectedTokenError(t);
+  if (!(0 in tokens) || tokens[0].type !== tt.COMMA) {
+    return new ParseResult(tokens, node);
   }
-  node = createNode(
-    sliceFormula(start, t.end),
-    child.value,
-    start,
-    t.end,
-    child.display,
-    [child]
-  );
-  return node;
+  const res = parseExpression(tokens.slice(1));
+  if (res === undefined) {
+    return new ParseResult(tokens, node);
+  }
+  node.tokens.push(tokens[0], ...res.tokens);
+  node.children.push(res.node);
+  return parseArgument(res.tokens, node);
 };
 
-const Sign = () => {
-  let node = Pare();
-  if (node !== false) {
-    return node;
+const parseConstant = (tokens: Token[]) => {
+  const res = parseNumber(tokens);
+  if (res !== undefined) {
+    return res;
   }
-  let t = currentToken();
-  if (t === false) {
-    throw UnexpectedEndError(0);
-  } else if (!(t.value in signOpr)) {
-    throw UnexpectedTokenError(t);
+  if (tokens[0].type !== tt.IDENTIFIER || !(tokens[0].word in constants)) {
+    return undefined;
   }
-  const start = t.start;
-  const end = t.end;
-  const opr = t.value;
-  g_tlPos++;
-  node = Pare();
-  if (node === false) {
-    throw UnexpectedEndError(end);
-  }
-  const value = signOpr[opr](node);
-  node = createNode(
-    sliceFormula(start, node.end),
-    value,
-    start,
-    node.end,
-    opr + node.display,
-    [node]
+  const value = constants[tokens[0].word].value;
+  return new ParseResult(
+    tokens.slice(1),
+    new Node(nt.CONSTANT, value, [tokens[0]])
   );
-  return node;
 };
 
-const Factor = () => {
-  let node = Sign();
-  const start = node.start;
-  while (true) {
-    const t = currentToken();
-    if (t === false || !(t.value in mulOpr)) {
-      return node;
+const parseFunc = (tokens: Token[]) => {
+  {
+    const res = parseConstant(tokens);
+    if (res !== undefined) {
+      return res;
     }
-    g_tlPos++;
-    const child = Sign();
-    const value = mulOpr[t.value](node, child);
-    node = createNode(
-      sliceFormula(start, child.end),
+  }
+  if (tokens[0].type !== tt.IDENTIFIER || !(tokens[0].word in funcs)) {
+    return undefined;
+  }
+  if (!(1 in tokens) && tokens[1].type !== tt.OPEN_PAREN) {
+    throw new UnexpectedTokenError(`"${tokens[1].word}" instead of "("`);
+  }
+  if (!(2 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseArgument(tokens.slice(2));
+  const args = res !== undefined ? res.node.children.map((n) => n.value) : [];
+  const func = funcs[tokens[0].word].funcs.find((f) =>
+    [args.length, Infinity].includes(f.args)
+  );
+  if (func === undefined) {
+    throw new InvalidArgsError("Args length is invalid");
+  }
+  const value = func.func(args);
+  if (res === undefined) {
+    if (2 in tokens && tokens[2].type === tt.CLOSE_PAREN) {
+      return new ParseResult(
+        tokens.slice(3),
+        new Node(nt.FUNCTION, value, tokens.slice(0, 3))
+      );
+    }
+    return new ParseResult(
+      tokens.slice(2),
+      new Node(nt.FUNCTION, value, tokens.slice(0, 2))
+    );
+  }
+  if (0 in res.tokens && res.tokens[0].type === tt.CLOSE_PAREN) {
+    return new ParseResult(
+      res.tokens.slice(1),
+      new Node(
+        nt.FUNCTION,
+        value,
+        tokens.slice(0, res.node.tokens.length + 3),
+        [res.node]
+      )
+    );
+  }
+  return new ParseResult(
+    res.tokens,
+    new Node(nt.FUNCTION, value, tokens.slice(0, res.node.tokens.length + 2), [
+      res.node,
+    ])
+  );
+};
+
+const parseExponent = (tokens: Token[]): ParseResult | undefined => {
+  const res = parseFunc(tokens);
+  if (res !== undefined) {
+    return res;
+  }
+  if (tokens[0].type === tt.TERM_OPERATOR) {
+    if (!(1 in tokens)) {
+      throw new UnexpectedEndError();
+    }
+    const res = parseExponent(tokens.slice(1));
+    if (res === undefined) {
+      throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+    }
+    const value = signOperators[tokens[0].word](res.node.value);
+    return new ParseResult(
+      res.tokens,
+      new Node(
+        nt.EXPONENT,
+        value,
+        tokens.slice(0, res.node.tokens.length + 1),
+        [res.node]
+      )
+    );
+  }
+  if (tokens[0].type === tt.OPEN_PAREN) {
+    if (!(0 in tokens)) {
+      throw new UnexpectedEndError();
+    }
+    const res = parseExpression(tokens.slice(1));
+    if (res === undefined) {
+      throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+    }
+    if (0 in res.tokens && res.tokens[0].type === tt.CLOSE_PAREN) {
+      return new ParseResult(
+        res.tokens.slice(1),
+        new Node(
+          nt.EXPONENT,
+          res.node.value,
+          tokens.slice(0, res.node.tokens.length + 1),
+          [res.node]
+        )
+      );
+    }
+    return new ParseResult(
+      res.tokens,
+      new Node(
+        nt.EXPONENT,
+        res.node.value,
+        tokens.slice(0, res.node.tokens.length + 1),
+        [res.node]
+      )
+    );
+  }
+  return undefined;
+};
+
+const parseFactor = (tokens: Token[], node?: Node): ParseResult | undefined => {
+  if (node === undefined) {
+    const res = parseExponent(tokens);
+    if (res === undefined) {
+      return undefined;
+    }
+    return parseFactor(res.tokens, res.node);
+  }
+  if (!(0 in tokens) || tokens[0].type !== tt.EXPONENT_OPERATOR) {
+    return new ParseResult(tokens, node);
+  }
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseFunc(tokens.slice(1));
+  if (res === undefined) {
+    throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+  }
+  const value = exponentOperator[tokens[0].word](node.value, res.node.value);
+  return parseFactor(
+    tokens.slice(2),
+    new Node(
+      nt.FACTOR,
       value,
-      start,
-      child.end,
-      String(value),
-      [node, child]
-    );
-  }
+      node.tokens.concat(tokens.slice(0, res.node.tokens.length + 1)),
+      [node, res.node]
+    )
+  );
 };
 
-const Adder = () => {
-  let node = Factor();
-  const start = node.start;
-  while (true) {
-    const t = currentToken();
-    if (t === false || !(t.value in addOpr)) {
-      return node;
+const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
+  if (node === undefined) {
+    const res = parseFactor(tokens);
+    if (res === undefined) {
+      return undefined;
     }
-    g_tlPos++;
-    const child = Factor();
-    const value = addOpr[t.value](node, child);
-    node = createNode(
-      sliceFormula(start, child.end),
+    return parseTerm(res.tokens, res.node);
+  }
+  if (!(0 in tokens)) {
+    return new ParseResult(tokens, node);
+  }
+  if (([nt.NUMBER, nt.EXPONENT] as string[]).includes(node.type)) {
+    const res = parseFactor(tokens);
+    if (
+      res !== undefined &&
+      ([nt.CONSTANT, nt.FUNCTION] as string[]).includes(res.node.type)
+    ) {
+      const value = factorOperators["*"](node.value, res.node.value);
+      return parseTerm(
+        res.tokens,
+        new Node(nt.TERM, value, node.tokens.concat(tokens.slice(0, 1)), [
+          node,
+          res.node,
+        ])
+      );
+    }
+  }
+  if (tokens[0].type !== tt.FACTOR_OPERATOR) {
+    return new ParseResult(tokens, node);
+  }
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseFactor(tokens.slice(1));
+  if (res === undefined) {
+    throw new UnexpectedTokenError(`${tokens[1].word}`);
+  }
+  if (["/", "%"].includes(tokens[0].word) && res.node.value === 0) {
+    throw new ZeroDivisionError(`${res.node.tokens.join("")} = 0`);
+  }
+  const value = factorOperators[tokens[0].word](node.value, res.node.value);
+  return parseTerm(
+    res.tokens,
+    new Node(
+      nt.TERM,
       value,
-      start,
-      child.end,
-      String(value),
-      [node, child]
-    );
-  }
+      node.tokens.concat(tokens.slice(0, res.node.tokens.length + 1)),
+      [node, res.node]
+    )
+  );
 };
 
-const createSyntaxTree = () => {
-  return Adder();
+const parseExpression = (
+  tokens: Token[],
+  node?: Node
+): ParseResult | undefined => {
+  if (node === undefined) {
+    const res = parseTerm(tokens);
+    if (res === undefined) {
+      return undefined;
+    }
+    return parseExpression(res.tokens, res.node);
+  }
+  if (!(0 in tokens) || tokens[0].type !== tt.TERM_OPERATOR) {
+    return new ParseResult(tokens, node);
+  }
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseTerm(tokens.slice(1));
+  if (res === undefined) {
+    throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+  }
+  const value = termOperators[tokens[0].word](node.value, res.node.value);
+  return parseExpression(
+    tokens.slice(2),
+    new Node(
+      nt.EXPRESSION,
+      value,
+      node.tokens.concat(tokens.slice(0, res.tokens.length + 1)),
+      [node, res.node]
+    )
+  );
 };
 
-export const calculate = (str: string) => {
-  g_tlPos = 0;
-  let lpare = 0;
-  let rpare = 0;
-  for (let i = 0; i < str.length; i++) {
-    const c = str[i];
-    if (c === o.L_PARE) lpare++;
-    if (c === o.R_PARE) rpare++;
+const parseAlter = (tokens: Token[]) => {
+  {
+    const res = parseExpression(tokens);
+    if (res !== undefined) {
+      if (0 in res.tokens) {
+        throw new UnexpectedTokenError(
+          `"${res.tokens.map((t) => t.word).join('", "')}"`
+        );
+      }
+      return res.node.value.toString();
+    }
   }
-  if (lpare < rpare) {
-    str = str.padStart(str.length + rpare - lpare, o.L_PARE);
+  if (tokens[0].type !== tt.IDENTIFIER || !(tokens[0].word in alters)) {
+    throw new InvalidTokenError(`"${tokens[0].word}"`);
   }
-  const tl = createTokenList(str);
-  g_tokenList = tl;
-  if (tl.length < 1) {
-    throw InvalidTokenError("", 0);
+  if (!(1 in tokens) && tokens[1].type !== tt.OPEN_PAREN) {
+    throw new UnexpectedTokenError(`"${tokens[1].word} instead of ("`);
   }
-  const node = createSyntaxTree();
-  if (g_tlPos < g_tokenList.length) {
-    throw UnexpectedTokenError(tl[tl.length - 1]);
+  if (!(2 in tokens)) {
+    throw new UnexpectedEndError();
   }
-  // dumpTokenDot(tl);
-  // dumpNodeDot(node);
-  // console.log(node);
-  // console.log(node.formula);
-  return node.display;
+  const res = parseArgument(tokens.slice(2));
+  if (res === undefined) {
+    throw new InvalidArgsError("Args length is invalid");
+  }
+  const args = res !== undefined ? res.node.children.map((n) => n.value) : [];
+  const alter = alters[tokens[0].word].funcs.find((f) =>
+    [args.length, Infinity].includes(f.args)
+  );
+  if (alter === undefined) {
+    throw new InvalidArgsError(`"${tokens[0].word}"`);
+  }
+  const text = alter.func(args);
+  return text;
 };
+
+export const calculate = (text: string) => {
+  const tokens = createTokenList(text);
+  if (!(0 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  return parseAlter(tokens);
+};
+
+// console.log(calculate("2 * 3"));
+// console.log(calculate("10 - 5 - 3"));
+// console.log(calculate("2 * (1 + (5 - 3) * 4)"));
+// console.log(calculate("-1"));
+// console.log(calculate("2 ^ 2 * pi"));
+// console.log(calculate("-sum(1, 3, 2 * (6 - 4))"));
+// console.log(calculate("sum(-1, -3, 2 * -(6 - 4))"));
+// console.log(calculate("5 * pi / (-sum(1, 3, 2 * (6 - 4)))"));
+// console.log(calculate("log(100) + log(16777216, 2)"));
+// console.log(calculate("-(1+4)"));
+// console.log(calculate("255 % (2 ^ 8)"));
+// console.log(calculate("0b101 + 0x0f"));
+// console.log(calculate("3 * (1 + 2"));
+// console.log(calculate("1 + 2) * 3"));
+// console.log(calculate("prime(153)"));
+// console.log(calculate("cvtbase(15, 8)"));
+// console.log(calculate("hex(810)"));
+// console.log(calculate("bin(30) + hex(16)"));
+// console.log(calculate("22pi/22"));

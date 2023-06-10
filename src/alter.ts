@@ -1,96 +1,103 @@
-import { bin, convertBase, hex } from "./base_conversion.js";
+import { convertBase } from "./base_conversion.js";
 import { hsl2rgb, rgb2hsl } from "./color.js";
 import { InvalidArgsError } from "./error.js";
-import { PrimeFactorFormula } from "./prime_factor.js";
-import { Node } from "./syntax_tree.js";
+import { expressPrimeFactors } from "./prime_factor.js";
 
 type Alter = {
-  minNodes: number;
-  maxNodes: number;
-  func: (n: Node[]) => string;
+  funcs: { args: number; func: (n: number[]) => string }[];
   description: string[];
 };
 
 export const alters: { [key: string]: Alter } = {
   prime: {
-    minNodes: 1,
-    maxNodes: 1,
-    func: (n) => {
-      if (n[0].value < 2) {
-        throw InvalidArgsError(n);
-      }
-      return PrimeFactorFormula(n[0].value);
-    },
+    funcs: [
+      {
+        args: 1,
+        func: (n) => {
+          if (n[0] < 2) {
+          }
+          return expressPrimeFactors(n[0]);
+        },
+      },
+    ],
     description: ["prime(n)", "nの素因数分解"],
   },
   cvtbase: {
-    minNodes: 2,
-    maxNodes: 2,
-    func: (n) => {
-      if (n[1].value === 2) {
-        return alters.bin.func(n);
-      }
-      if (n[1].value === 10) {
-        return alters.dec.func(n);
-      }
-      if (n[1].value === 16) {
-        return alters.hex.func(n);
-      }
-      if (n[1].value < 2 || 64 < n[1].value) {
-        throw InvalidArgsError([n[1]]);
-      }
-      return (
-        convertBase(n[0].value, n[1].value) + "(" + String(n[1].value + ")")
-      );
-    },
+    funcs: [
+      {
+        args: 2,
+        func: (n) => {
+          if (n[1] === 2) {
+            return alters.bin.funcs[0].func(n);
+          }
+          if (n[1] === 10) {
+            return alters.dec.funcs[0].func(n);
+          }
+          if (n[1] === 16) {
+            return alters.hex.funcs[0].func(n);
+          }
+          if (n[1] < 2 || 64 < n[1]) {
+            throw new InvalidArgsError("cvtbase(n), 2 <= n <= 64");
+          }
+          return convertBase(n[0], n[1]) + "(" + String(n[1] + ")");
+        },
+      },
+    ],
     description: ["cvtbase(n, m)", "nをm進数に変換"],
   },
   dec: {
-    minNodes: 1,
-    maxNodes: 1,
-    func: (n) => {
-      return String(n[0].value);
-    },
+    funcs: [
+      {
+        args: 1,
+        func: (n) => {
+          return String(n[0]);
+        },
+      },
+    ],
     description: ["dec(n)", "nを十進数に変換"],
   },
   hex: {
-    minNodes: 1,
-    maxNodes: 1,
-    func: (n) => {
-      return "0x" + hex(n[0].value);
-    },
+    funcs: [
+      {
+        args: 1,
+        func: (n) => {
+          return "0x" + n[0].toString(16);
+        },
+      },
+    ],
     description: ["hex(n)", "nを十六進数に変換"],
   },
   bin: {
-    minNodes: 1,
-    maxNodes: 1,
-    func: (n) => {
-      return "0b" + bin(n[0].value);
-    },
+    funcs: [
+      {
+        args: 1,
+        func: (n) => {
+          return "0b" + n[0].toString(2);
+        },
+      },
+    ],
     description: ["bin(n)", "nを二進数に変換"],
   },
   rgb2hsl: {
-    minNodes: 1,
-    maxNodes: 3,
-    func: (n) => {
-      if (n.length === 2) {
-        throw InvalidArgsError(n);
-      }
-      let r = 0;
-      let g = 0;
-      let b = 0;
-      if (n.length === 1) {
-        r = (n[0].value >> 16) & 0xff;
-        g = (n[0].value >> 8) & 0xff;
-        b = (n[0].value >> 0) & 0xff;
-      } else if (n.length === 3) {
-        r = n[0].value;
-        g = n[1].value;
-        b = n[2].value;
-      }
-      const hsl = rgb2hsl(r, g, b);
-      return `hsl(${hsl.h}deg, ${hsl.s}%, ${hsl.l}%)`;
-    },
+    funcs: [
+      {
+        args: 1,
+        func: (n) => {
+          const r = (n[0] >> 16) & 0xff;
+          const g = (n[0] >> 8) & 0xff;
+          const b = (n[0] >> 0) & 0xff;
+          const hsl = rgb2hsl(r, g, b);
+          return `hsl(${hsl.h}deg, ${hsl.s}%, ${hsl.l}%)`;
+        },
+      },
+      {
+        args: 3,
+        func: (n) => {
+          const hsl = rgb2hsl(n[0], n[1], n[2]);
+          return `hsl(${hsl.h}deg, ${hsl.s}%, ${hsl.l}%)`;
+        },
+      },
+    ],
     description: [
       "1. rgb2hsl(rgb)",
       "rgbをhslに変換",
@@ -99,18 +106,18 @@ export const alters: { [key: string]: Alter } = {
     ],
   },
   hsl2rgb: {
-    minNodes: 3,
-    maxNodes: 3,
-    func: (n) => {
-      let h = n[0].value;
-      let s = n[1].value;
-      let l = n[2].value;
-      const rgb = hsl2rgb(h, s, l);
-      const r = hex(Math.floor(rgb.r));
-      const g = hex(Math.floor(rgb.g));
-      const b = hex(Math.floor(rgb.b));
-      return "#" + r + g + b;
-    },
+    funcs: [
+      {
+        args: 3,
+        func: (n) => {
+          const rgb = hsl2rgb(n[0], n[1], n[2]);
+          const r = Math.floor(rgb.r).toString(16);
+          const g = Math.floor(rgb.g).toString(16);
+          const b = Math.floor(rgb.b).toString(16);
+          return "#" + r + g + b;
+        },
+      },
+    ],
     description: [
       "1. hsl2rgb(hsl)",
       "hslをrgbに変換",

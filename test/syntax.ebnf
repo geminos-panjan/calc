@@ -1,0 +1,9 @@
+expression = term, {"+" | "-", term};
+term = factor, {"*" | "/", factor};
+factor = exponent, {"^", exponent};
+exponent = ["+" | "-"], number | constant | function | "(", expression ")";
+function = identifier, "(", [argument], ")";
+argument = {expression, [","]};
+constant = identifier;
+number = binary | hex | float | integer;
+# list = "[", [argument], "]";

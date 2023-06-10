@@ -1,67 +1,65 @@
-const divisible = (a: number, b: number) => {
+const isDivisible = (a: number, b: number) => {
   if (a < 2 || b < 2) {
     return false;
   }
   return a % b === 0;
 };
 
-const divAll = (factors: { [key: string]: number }, a: number, b: number) => {
-  if (!divisible(a, b)) {
-    return a;
+const divRec = (
+  a: number,
+  b: number,
+  d: number = 0
+): { quotient: number; depth: number } => {
+  if (!isDivisible(a, b)) {
+    return { quotient: a, depth: d };
   }
-  factors[b] = 0;
-  while (a > 1 && divisible(a, b)) {
-    a = Math.floor(a / b);
-    factors[b]++;
-  }
-  return a;
+  return divRec(a / b, b, d + 1);
 };
 
-const PrimeFactors = (factors: { [key: string]: number }, n: number) => {
-  if (n < 2) {
-    return;
-  }
-  n = divAll(factors, n, 2);
-  if (n < 2) {
-    return;
-  }
-  n = divAll(factors, n, 3);
-  if (n < 2) {
-    return;
-  }
-  let even = true;
-  for (
-    let div = 5;
-    1 < n && div <= Math.sqrt(n);
-    div += (even = !even) ? 4 : 2
-  ) {
-    n = divAll(factors, n, div);
-  }
-  if (n > 1) {
-    factors[n] = 1;
-  }
+const createDivisorList = (start: number, end: number) => {
+  const max = Math.sqrt(end);
+  const len = Math.floor((max - (max % 3)) / 2);
+  const divisors = new Array(len).fill(0).map((_, i) => 3 + i * 2);
+  return [2, ...divisors].filter((d) => d >= start);
 };
 
-export const PrimeFactorFormula = (num: number) => {
-  if (num < 2) {
-    return "";
+const primeFactorize = (
+  n: number,
+  start: number = 2,
+  primes: { [key: string]: number } = {}
+): { [key: string]: number } => {
+  const divisors = createDivisorList(start, n);
+  if (divisors.length === 0) {
+    primes[String(n)] = 1;
+    return primes;
   }
-  const factors: { [key: string]: number } = {};
-  PrimeFactors(factors, num);
-  let out = "";
-  if (Object.keys(factors).length < 1) {
-    out += `${num}`;
-    return out;
-  }
-  const keys = Object.keys(factors);
-  for (let i = 0; i < keys.length; i++) {
-    out += `${keys[i]}`;
-    if (factors[keys[i]] > 1) {
-      out += ` ^ ${factors[keys[i]]}`;
+  if (!isDivisible(n, divisors[0])) {
+    if (divisors.length === 1) {
+      primes[String(n)] = 1;
+      return primes;
     }
-    if (i < keys.length - 1) {
-      out += " * ";
-    }
+    return primeFactorize(n, divisors[1], primes);
   }
-  return out;
+  const div = divRec(n, divisors[0]);
+  primes[String(divisors[0])] = div.depth;
+  if (div.quotient === 1) {
+    return primes;
+  }
+  return primeFactorize(div.quotient, divisors[1], primes);
 };
+
+export const expressPrimeFactors = (num: number) => {
+  const primes = primeFactorize(num);
+  const keys = Object.keys(primes);
+  if (keys.length < 1) {
+    return String(num);
+  }
+  return keys
+    .map((k) => String(k) + (primes[k] > 1 ? ` ^ ${primes[k]}` : ""))
+    .join(" * ");
+};
+
+// console.log(expressPrimeFactors(9991));
+// console.log(expressPrimeFactors(732));
+// console.log(expressPrimeFactors(128));
+// console.log(expressPrimeFactors(1000));
