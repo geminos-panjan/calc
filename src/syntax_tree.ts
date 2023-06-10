@@ -14,12 +14,7 @@ import {
   signOperators,
   termOperators,
 } from "./operator.js";
-import {
-  Token,
-  TokenType,
-  createTokenList,
-  tokenTypes as tt,
-} from "./token.js";
+import { Token, createTokenList, tokenTypes as tt } from "./token.js";
 
 const nodeTypes = {
   EXPRESSION: "EXPRESSION",
@@ -27,6 +22,7 @@ const nodeTypes = {
   FACTOR: "FACTOR",
   EXPONENT: "EXPONENT",
   FUNCTION: "FUNCTION",
+  ALTER: "ALTER",
   ARGUMENT: "ARGUMENT",
   CONSTANT: "CONSTANT",
   NUMBER: "NUMBER",
@@ -37,17 +33,20 @@ type NodeType = (typeof nt)[keyof typeof nt];
 class Node {
   type;
   value;
+  text;
   tokens;
   children;
 
   constructor(
     type: NodeType,
     value: number = 0,
+    text: string = "",
     tokens: Token[] = [],
     children: Node[] = []
   ) {
     this.type = type;
     this.value = value;
+    this.text = text;
     this.tokens = tokens;
     this.children = children;
   }
@@ -63,18 +62,15 @@ class ParseResult {
 }
 
 const parseNumber = (tokens: Token[]) => {
-  const numberTypes = [tt.BINARY, tt.HEX, tt.FLOAT, tt.INTEGER];
-  if (!(numberTypes as string[]).includes(tokens[0].type)) {
+  if (tokens[0].type !== tt.NUMBER) {
     return undefined;
   }
   const value = Number(tokens[0].word);
   if (isNaN(value)) {
     throw new InvalidTokenError(`"${tokens[0].word}" is NaN`);
   }
-  return new ParseResult(
-    tokens.slice(1),
-    new Node(nt.NUMBER, value, [tokens[0]])
-  );
+  const node = new Node(nt.NUMBER, value, value.toString(), [tokens[0]]);
+  return new ParseResult(tokens.slice(1), node);
 };
 
 const parseArgument = (
@@ -91,7 +87,7 @@ const parseArgument = (
     }
     return parseArgument(
       res.tokens,
-      new Node(nt.ARGUMENT, NaN, [tokens[0]], [res.node])
+      new Node(nt.ARGUMENT, NaN, "", [tokens[0]], [res.node])
     );
   }
   if (!(0 in tokens) || tokens[0].type !== tt.COMMA) {
@@ -101,7 +97,7 @@ const parseArgument = (
   if (res === undefined) {
     return new ParseResult(tokens, node);
   }
-  node.tokens.push(tokens[0], ...res.tokens);
+  node.tokens.push(tokens[0], ...res.node.tokens);
   node.children.push(res.node);
   return parseArgument(res.tokens, node);
 };
@@ -111,14 +107,12 @@ const parseConstant = (tokens: Token[]) => {
   if (res !== undefined) {
     return res;
   }
-  if (tokens[0].type !== tt.IDENTIFIER || !(tokens[0].word in constants)) {
+  if (tokens[0].type !== tt.CONSTANT) {
     return undefined;
   }
   const value = constants[tokens[0].word].value;
-  return new ParseResult(
-    tokens.slice(1),
-    new Node(nt.CONSTANT, value, [tokens[0]])
-  );
+  const node = new Node(nt.CONSTANT, value, value.toString(), [tokens[0]]);
+  return new ParseResult(tokens.slice(1), node);
 };
 
 const parseFunc = (tokens: Token[]) => {
@@ -128,7 +122,7 @@ const parseFunc = (tokens: Token[]) => {
       return res;
     }
   }
-  if (tokens[0].type !== tt.IDENTIFIER || !(tokens[0].word in funcs)) {
+  if (tokens[0].type !== tt.FUNCTION || !(tokens[0].word in funcs)) {
     return undefined;
   }
   if (!(1 in tokens) && tokens[1].type !== tt.OPEN_PAREN) {
@@ -147,38 +141,57 @@ const parseFunc = (tokens: Token[]) => {
   }
   const value = func.func(args);
   if (res === undefined) {
-    if (2 in tokens && tokens[2].type === tt.CLOSE_PAREN) {
-      return new ParseResult(
-        tokens.slice(3),
-        new Node(nt.FUNCTION, value, tokens.slice(0, 3))
-      );
+    const closeParen = 2 in tokens && tokens[2].type === tt.CLOSE_PAREN ? 1 : 0;
+    const resTokens = tokens.slice(0, 2 + closeParen);
+    const node = new Node(nt.FUNCTION, value, value.toString(), resTokens);
+    return new ParseResult(tokens.slice(2 + closeParen), node);
+  }
+  const closeParen =
+    0 in res.tokens && res.tokens[0].type === tt.CLOSE_PAREN ? 1 : 0;
+  const resTokens = tokens.slice(0, res.node.tokens.length + 2 + closeParen);
+  const node = new Node(nt.FUNCTION, value, value.toString(), resTokens, [
+    res.node,
+  ]);
+  return new ParseResult(res.tokens.slice(closeParen), node);
+};
+
+const parseAlter = (tokens: Token[]) => {
+  {
+    const res = parseFunc(tokens);
+    if (res !== undefined) {
+      return res;
     }
-    return new ParseResult(
-      tokens.slice(2),
-      new Node(nt.FUNCTION, value, tokens.slice(0, 2))
-    );
   }
-  if (0 in res.tokens && res.tokens[0].type === tt.CLOSE_PAREN) {
-    return new ParseResult(
-      res.tokens.slice(1),
-      new Node(
-        nt.FUNCTION,
-        value,
-        tokens.slice(0, res.node.tokens.length + 3),
-        [res.node]
-      )
-    );
+  if (tokens[0].type !== tt.FUNCTION || !(tokens[0].word in alters)) {
+    return undefined;
   }
-  return new ParseResult(
-    res.tokens,
-    new Node(nt.FUNCTION, value, tokens.slice(0, res.node.tokens.length + 2), [
-      res.node,
-    ])
+  if (!(1 in tokens) && tokens[1].type !== tt.OPEN_PAREN) {
+    throw new UnexpectedTokenError(`"${tokens[1].word} instead of ("`);
+  }
+  if (!(2 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseArgument(tokens.slice(2));
+  if (res === undefined) {
+    throw new InvalidArgsError("Args length is invalid");
+  }
+  const args = res.node.children.map((n) => n.value);
+  const alter = alters[tokens[0].word].funcs.find((f) =>
+    [args.length, Infinity].includes(f.args)
   );
+  if (alter === undefined) {
+    throw new InvalidArgsError(`"${tokens[0].word}"`);
+  }
+  const text = alter.func(args);
+  const closeParen =
+    0 in res.tokens && res.tokens[0].type === tt.CLOSE_PAREN ? 1 : 0;
+  const resTokens = tokens.slice(0, res.node.tokens.length + 2 + closeParen);
+  const node = new Node(nt.FUNCTION, args[0], text, resTokens, [res.node]);
+  return new ParseResult(res.tokens.slice(closeParen), node);
 };
 
 const parseExponent = (tokens: Token[]): ParseResult | undefined => {
-  const res = parseFunc(tokens);
+  const res = parseAlter(tokens);
   if (res !== undefined) {
     return res;
   }
@@ -191,15 +204,11 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
       throw new UnexpectedTokenError(`"${tokens[1].word}"`);
     }
     const value = signOperators[tokens[0].word](res.node.value);
-    return new ParseResult(
-      res.tokens,
-      new Node(
-        nt.EXPONENT,
-        value,
-        tokens.slice(0, res.node.tokens.length + 1),
-        [res.node]
-      )
-    );
+    const resTokens = tokens.slice(0, res.node.tokens.length + 1);
+    const node = new Node(nt.EXPONENT, value, value.toString(), resTokens, [
+      res.node,
+    ]);
+    return new ParseResult(res.tokens, node);
   }
   if (tokens[0].type === tt.OPEN_PAREN) {
     if (!(0 in tokens)) {
@@ -209,26 +218,17 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
     if (res === undefined) {
       throw new UnexpectedTokenError(`"${tokens[1].word}"`);
     }
-    if (0 in res.tokens && res.tokens[0].type === tt.CLOSE_PAREN) {
-      return new ParseResult(
-        res.tokens.slice(1),
-        new Node(
-          nt.EXPONENT,
-          res.node.value,
-          tokens.slice(0, res.node.tokens.length + 1),
-          [res.node]
-        )
-      );
-    }
-    return new ParseResult(
-      res.tokens,
-      new Node(
-        nt.EXPONENT,
-        res.node.value,
-        tokens.slice(0, res.node.tokens.length + 1),
-        [res.node]
-      )
+    const closeParen =
+      0 in res.tokens && res.tokens[0].type === tt.CLOSE_PAREN ? 1 : 0;
+    const resTokens = tokens.slice(0, res.node.tokens.length + 1 + closeParen);
+    const node = new Node(
+      nt.EXPONENT,
+      res.node.value,
+      res.node.value.toString(),
+      resTokens,
+      [res.node]
     );
+    return new ParseResult(res.tokens.slice(closeParen), node);
   }
   return undefined;
 };
@@ -247,20 +247,17 @@ const parseFactor = (tokens: Token[], node?: Node): ParseResult | undefined => {
   if (!(1 in tokens)) {
     throw new UnexpectedEndError();
   }
-  const res = parseFunc(tokens.slice(1));
+  const res = parseExponent(tokens.slice(1));
   if (res === undefined) {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
   const value = exponentOperator[tokens[0].word](node.value, res.node.value);
-  return parseFactor(
-    res.tokens,
-    new Node(
-      nt.FACTOR,
-      value,
-      node.tokens.concat(tokens.slice(0, res.node.tokens.length + 1)),
-      [node, res.node]
-    )
-  );
+  const resTokens = [...node.tokens, tokens[0], ...res.node.tokens];
+  const resNode = new Node(nt.FACTOR, value, value.toString(), resTokens, [
+    node,
+    res.node,
+  ]);
+  return parseFactor(res.tokens, resNode);
 };
 
 const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
@@ -275,19 +272,18 @@ const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
     return new ParseResult(tokens, node);
   }
   if (([nt.NUMBER, nt.EXPONENT] as string[]).includes(node.type)) {
-    const res = parseFactor(tokens);
+    const res = parseAlter(tokens);
     if (
       res !== undefined &&
       ([nt.CONSTANT, nt.FUNCTION] as string[]).includes(res.node.type)
     ) {
       const value = factorOperators["*"](node.value, res.node.value);
-      return parseTerm(
-        res.tokens,
-        new Node(nt.TERM, value, node.tokens.concat(tokens.slice(0, 1)), [
-          node,
-          res.node,
-        ])
-      );
+      const resTokens = [...node.tokens, ...res.node.tokens];
+      const resNode = new Node(nt.TERM, value, value.toString(), resTokens, [
+        node,
+        res.node,
+      ]);
+      return parseTerm(res.tokens, resNode);
     }
   }
   if (tokens[0].type !== tt.FACTOR_OPERATOR) {
@@ -304,15 +300,12 @@ const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
     throw new ZeroDivisionError(`${res.node.tokens.join("")} = 0`);
   }
   const value = factorOperators[tokens[0].word](node.value, res.node.value);
-  return parseTerm(
-    res.tokens,
-    new Node(
-      nt.TERM,
-      value,
-      node.tokens.concat(tokens.slice(0, res.node.tokens.length + 1)),
-      [node, res.node]
-    )
-  );
+  const resTokens = [...node.tokens, tokens[0], ...res.node.tokens];
+  const resNode = new Node(nt.TERM, value, value.toString(), resTokens, [
+    node,
+    res.node,
+  ]);
+  return parseTerm(res.tokens, resNode);
 };
 
 const parseExpression = (
@@ -337,82 +330,75 @@ const parseExpression = (
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
   const value = termOperators[tokens[0].word](node.value, res.node.value);
-  return parseExpression(
-    res.tokens,
-    new Node(
-      nt.EXPRESSION,
-      value,
-      node.tokens.concat(tokens.slice(0, res.tokens.length + 1)),
-      [node, res.node]
-    )
+  const resTokens = node.tokens.concat(
+    tokens.slice(0, res.node.tokens.length + 1)
   );
+  const resNode = new Node(nt.EXPRESSION, value, value.toString(), resTokens, [
+    node,
+    res.node,
+  ]);
+  return parseExpression(res.tokens, resNode);
 };
 
-const parseAlter = (tokens: Token[]) => {
-  {
-    const res = parseExpression(tokens);
-    if (res !== undefined) {
-      if (0 in res.tokens) {
-        throw new UnexpectedTokenError(
-          `"${res.tokens.map((t) => t.word).join('", "')}"`
-        );
-      }
-      return res.node.value.toString();
-    }
-  }
-  if (tokens[0].type !== tt.IDENTIFIER || !(tokens[0].word in alters)) {
-    throw new InvalidTokenError(`"${tokens[0].word}"`);
-  }
-  if (!(1 in tokens) && tokens[1].type !== tt.OPEN_PAREN) {
-    throw new UnexpectedTokenError(`"${tokens[1].word} instead of ("`);
-  }
-  if (!(2 in tokens)) {
+export const createSyntaxTree = (tokens: Token[]) => {
+  if (!(0 in tokens)) {
     throw new UnexpectedEndError();
   }
-  const res = parseArgument(tokens.slice(2));
-  if (res === undefined) {
-    throw new InvalidArgsError("Args length is invalid");
+  const error = tokens.find((t) => t.type === tt.ERROR);
+  if (error !== undefined) {
+    throw new InvalidTokenError(`"${error.word}"`);
   }
-  if (0 in res.tokens && res.tokens[0].type !== tt.CLOSE_PAREN) {
+  const res = parseExpression(tokens);
+  if (res === undefined) {
+    throw new InvalidTokenError(`"${tokens[0].word}"`);
+  }
+  if (0 in res.tokens) {
     throw new UnexpectedTokenError(
       `"${res.tokens.map((t) => t.word).join('", "')}"`
     );
   }
-  const args = res !== undefined ? res.node.children.map((n) => n.value) : [];
-  const alter = alters[tokens[0].word].funcs.find((f) =>
-    [args.length, Infinity].includes(f.args)
-  );
-  if (alter === undefined) {
-    throw new InvalidArgsError(`"${tokens[0].word}"`);
-  }
-  const text = alter.func(args);
-  return text;
+  return res.node;
 };
 
-export const calculate = (text: string) => {
+const getNodeInfo = (node: Node) => {
+  const tokens = node.tokens.map((t) => t.word).join(" ");
+  if (tokens === node.text || node.text === "") {
+    return `[${tokens}]`;
+  }
+  return `[${tokens} = ${node.text}]`;
+};
+
+const diveNode = (node: Node, depth: number = 1): string => {
+  const tabs = new Array(depth).fill("  ").join("");
+  const resText = `${tabs}${getNodeInfo(node)}\n`;
+  if (!(0 in node.children)) {
+    return resText;
+  }
+  return node.children.reduce((p, c) => p + diveNode(c, depth + 1), resText);
+};
+
+const echoSyntaxTree = (text: string) => {
   const tokens = createTokenList(text);
-  if (!(0 in tokens)) {
-    throw new UnexpectedEndError();
-  }
-  return parseAlter(tokens);
+  const node = createSyntaxTree(tokens);
+  return `[\n${diveNode(node)}]`;
 };
 
-// console.log(calculate("2 * 3"));
-// console.log(calculate("10 - 5 - 3"));
-// console.log(calculate("2 * (1 + (5 - 3) * 4)"));
-// console.log(calculate("-1"));
-// console.log(calculate("2 ^ 2 * pi"));
-// console.log(calculate("-sum(1, 3, 2 * (6 - 4))"));
-// console.log(calculate("sum(-1, -3, 2 * -(6 - 4))"));
-// console.log(calculate("5 * pi / (-sum(1, 3, 2 * (6 - 4)))"));
-// console.log(calculate("log(100) + log(16777216, 2)"));
-// console.log(calculate("-(1+4)"));
-// console.log(calculate("255 % (2 ^ 8)"));
-// console.log(calculate("0b101 + 0x0f"));
-// console.log(calculate("3 * (1 + 2"));
-// console.log(calculate("1 + 2) * 3"));
-// console.log(calculate("prime(153)"));
-// console.log(calculate("cvtbase(15, 8)"));
-// console.log(calculate("hex(810)"));
-// console.log(calculate("bin(30) + hex(16)"));
-// console.log(calculate("22pi/22"));
+// console.log(echoSyntaxTree("2 * 3"));
+// console.log(echoSyntaxTree("10 - 5 - 3"));
+// console.log(echoSyntaxTree("2 * (1 + (5 - 3) * 4)"));
+// console.log(echoSyntaxTree("-1"));
+// console.log(echoSyntaxTree("2 ^ 2 * pi"));
+// console.log(echoSyntaxTree("-sum(1, 3, 2 * (6 - 4))"));
+// console.log(echoSyntaxTree("sum(-1, -3, 2 * -(6 - 4))"));
+// console.log(echoSyntaxTree("5 * pi / (-sum(1, 3, 2 * (6 - 4)))"));
+// console.log(echoSyntaxTree("log(100) + log(16777216, 2)"));
+// console.log(echoSyntaxTree("-(1+4)"));
+// console.log(echoSyntaxTree("255 % (2 ^ 8)"));
+// console.log(echoSyntaxTree("0b101 + 0x0f"));
+// console.log(echoSyntaxTree("3 * (1 + 2"));
+// console.log(echoSyntaxTree("1 + 2) * 3"));
+// console.log(echoSyntaxTree("prime(153)"));
+// console.log(echoSyntaxTree("cvtbase(15, 8)"));
+// console.log(echoSyntaxTree("hex(810)"));
+// console.log(echoSyntaxTree("bin(30) + hex(16)"));
+// console.log(echoSyntaxTree("22pi/22"));

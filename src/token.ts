@@ -1,15 +1,18 @@
 import { alters } from "./alter.js";
 import { constants } from "./constant.js";
-import { InvalidTokenError } from "./error.js";
 import { funcs } from "./func.js";
 
 export const tokenTypes = {
+  ERROR: "ERROR",
+  NUMBER: "NUMBER",
   INTEGER: "INTEGER",
   FLOAT: "FLOAT",
   BINARY: "BINARY",
   HEX: "HEX",
   STRING: "STRING",
   IDENTIFIER: "IDENTIFIER",
+  CONSTANT: "CONSTANT",
+  FUNCTION: "FUNCTION",
   TERM_OPERATOR: "TERM_OPERATOR",
   FACTOR_OPERATOR: "FACTOR_OPERATOR",
   EXPONENT_OPERATOR: "EXPONENT_OPERATOR",
@@ -39,10 +42,13 @@ type Parser = {
 
 const parsers: Parser[] = [
   { pattern: /^\s+/ },
-  { pattern: /^0b[01]+/i, type: tt.BINARY },
-  { pattern: /^0x[\da-f]+/i, type: tt.HEX },
-  { pattern: /^(\d*\.\d+|\d+\.\d*)(e[+-]?\d+)?/i, type: tt.FLOAT },
-  { pattern: /^\d+/, type: tt.INTEGER },
+  { pattern: /^0b[01_]+/i, type: tt.BINARY },
+  { pattern: /^0x[\da-f_]+/i, type: tt.HEX },
+  {
+    pattern: /^([\d_]*\.[\d_]+|[\d_]+\.[\d_]*)(e[+-]?[\d_]+)?/i,
+    type: tt.FLOAT,
+  },
+  { pattern: /^[\d_]+/, type: tt.INTEGER },
   { pattern: /^"(\\"|[^"])*"/, type: tt.STRING },
   { pattern: /^[a-z]\w*/i, type: tt.IDENTIFIER },
   { pattern: /^[\+\-]/, type: tt.TERM_OPERATOR },
@@ -73,21 +79,35 @@ export const createTokenList = (text: string, tokens?: Token[]): Token[] => {
   }
   const parser = parsers.find((p) => p.pattern.test(text));
   if (parser === undefined) {
-    throw new InvalidTokenError(`"${text[0]}"`);
+    tokens.push(new Token(tt.ERROR, text[0]));
+    return createTokenList(text.slice(1), tokens);
   }
   const match = parser.pattern.exec(text);
   if (match == null) {
-    throw new InvalidTokenError(`"${text[0]}"`);
+    tokens.push(new Token(tt.ERROR, text[0]));
+    return createTokenList(text.slice(1), tokens);
   }
-  if (parser.type !== undefined) {
+  if (parser.type === undefined) {
+    return createTokenList(text.slice(match[0].length), tokens);
+  }
+  const type = ((type: TokenType, match: string) => {
     if (
-      parser.type === tt.IDENTIFIER &&
-      !(match[0] in Object.assign({}, alters, funcs, constants))
+      ([tt.BINARY, tt.HEX, tt.FLOAT, tt.INTEGER] as TokenType[]).includes(type)
     ) {
-      throw new InvalidTokenError(`"${match[0]}"`);
+      return tt.NUMBER;
     }
-    tokens.push(new Token(parser.type, match[0]));
-  }
+    if (type === tt.IDENTIFIER) {
+      if (match in constants) {
+        return tt.CONSTANT;
+      }
+      if (match in Object.assign({}, funcs, alters)) {
+        return tt.FUNCTION;
+      }
+      return tt.ERROR;
+    }
+    return type;
+  })(parser.type, match[0]);
+  tokens.push(new Token(type, match[0]));
   return createTokenList(text.slice(match[0].length), tokens);
 };
 
