@@ -83,7 +83,7 @@ const parseArgument = (
     }
     const res = parseExpression(tokens);
     if (res === undefined) {
-      throw new UnexpectedTokenError(`"${tokens[0].word}"`);
+      return undefined;
     }
     return parseArgument(
       res.tokens,
@@ -127,9 +127,6 @@ const parseFunc = (tokens: Token[]) => {
   }
   if (!(1 in tokens) && tokens[1].type !== tt.OPEN_PAREN) {
     throw new UnexpectedTokenError(`"${tokens[1].word}" instead of "("`);
-  }
-  if (!(2 in tokens)) {
-    throw new UnexpectedEndError();
   }
   const res = parseArgument(tokens.slice(2));
   const args = res !== undefined ? res.node.children.map((n) => n.value) : [];
@@ -402,3 +399,5 @@ const echoSyntaxTree = (text: string) => {
 // console.log(echoSyntaxTree("hex(810)"));
 // console.log(echoSyntaxTree("bin(30) + hex(16)"));
 // console.log(echoSyntaxTree("22pi/22"));
+console.log(echoSyntaxTree("exp("));
+console.log(echoSyntaxTree("exp()"));

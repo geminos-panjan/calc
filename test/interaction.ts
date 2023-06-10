@@ -1,6 +1,6 @@
 import { createInterface } from "readline";
 import { stdin as input, stdout as output } from "process";
-import { calculate } from "../src/syntax_tree.js";
+import { calculate } from "../src/index.js";
 
 const interaction = () => {
   console.log("calc - JavaScript Calculator");
