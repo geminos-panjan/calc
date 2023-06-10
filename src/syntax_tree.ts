@@ -253,7 +253,7 @@ const parseFactor = (tokens: Token[], node?: Node): ParseResult | undefined => {
   }
   const value = exponentOperator[tokens[0].word](node.value, res.node.value);
   return parseFactor(
-    tokens.slice(2),
+    res.tokens,
     new Node(
       nt.FACTOR,
       value,
@@ -338,7 +338,7 @@ const parseExpression = (
   }
   const value = termOperators[tokens[0].word](node.value, res.node.value);
   return parseExpression(
-    tokens.slice(2),
+    res.tokens,
     new Node(
       nt.EXPRESSION,
       value,
@@ -372,6 +372,11 @@ const parseAlter = (tokens: Token[]) => {
   const res = parseArgument(tokens.slice(2));
   if (res === undefined) {
     throw new InvalidArgsError("Args length is invalid");
+  }
+  if (0 in res.tokens && res.tokens[0].type !== tt.CLOSE_PAREN) {
+    throw new UnexpectedTokenError(
+      `"${res.tokens.map((t) => t.word).join('", "')}"`
+    );
   }
   const args = res !== undefined ? res.node.children.map((n) => n.value) : [];
   const alter = alters[tokens[0].word].funcs.find((f) =>

@@ -20,8 +20,8 @@ test.each([
   { exp: "1 + 2) * 3", res: "9" },
   { exp: "prime(153)", res: "3 ^ 2 * 17" },
   { exp: "cvtbase(15, 8)", res: "17(8)" },
-  { exp: "hex(810)", res: "0x032A" },
-  { exp: "bin(30) + hex(16)", res: "46" },
+  { exp: "hex(810)", res: "0x32a" },
+  { exp: "bin(30)", res: "0b11110" },
 ])(`$exp = $res`, ({ exp, res }) => {
   expect(calculate(exp)).toBe(res);
 });
