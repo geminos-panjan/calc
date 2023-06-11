@@ -399,5 +399,5 @@ const echoSyntaxTree = (text: string) => {
 // console.log(echoSyntaxTree("hex(810)"));
 // console.log(echoSyntaxTree("bin(30) + hex(16)"));
 // console.log(echoSyntaxTree("22pi/22"));
-console.log(echoSyntaxTree("exp("));
-console.log(echoSyntaxTree("exp()"));
+// console.log(echoSyntaxTree("exp("));
+// console.log(echoSyntaxTree("exp()"));
