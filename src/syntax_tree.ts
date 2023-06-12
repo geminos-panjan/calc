@@ -65,7 +65,7 @@ const parseNumber = (tokens: Token[]) => {
   if (tokens[0].type !== tt.NUMBER) {
     return undefined;
   }
-  const value = Number(tokens[0].word);
+  const value = Number(tokens[0].word.replace("_", ""));
   if (isNaN(value)) {
     throw new InvalidTokenError(`"${tokens[0].word}" is NaN`);
   }

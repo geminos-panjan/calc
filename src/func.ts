@@ -99,9 +99,6 @@ export const funcs: { [key: string]: Func } = {
       {
         args: 1,
         func: (n) => {
-          if (n.length === 0) {
-            return Date.now();
-          }
           const d = new Date();
           d.setMilliseconds(n[0] % 1000);
           d.setSeconds((n[0] / 1e3) % 100);
@@ -231,7 +228,7 @@ export const funcs: { [key: string]: Func } = {
   },
 };
 
-const time = funcs.time.funcs[0].func([2023_06_12_15_50_00_000]);
-console.log(time);
-console.log(funcs.date.funcs[0].func([time]));
-console.log(funcs.fact.funcs[0].func([4]));
+// const time = funcs.time.funcs[1].func([Number("20230612155000000")]);
+// console.log(time);
+// console.log(funcs.date.funcs[1].func([time]));
+// console.log(funcs.fact.funcs[0].func([4]));
