@@ -78,6 +78,10 @@ export const alters: { [key: string]: Alter } = {
     ],
     description: ["bin(n)", "nを二進数に変換"],
   },
+  exp: {
+    funcs: [{ args: 1, func: (n) => n[0].toExponential() }],
+    description: ["exp(n)", "nを指数表記に変換"],
+  },
   rgb2hsl: {
     funcs: [
       {

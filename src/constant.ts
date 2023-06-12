@@ -8,6 +8,10 @@ export const constants: { [key: string]: Constant } = {
     value: Math.PI,
     description: ["pi", "円周率"],
   },
+  e: {
+    value: Math.E,
+    description: ["e", "ネイピア数"],
+  },
   lbm: {
     value: 0.45359237,
     description: ["lbm", "1ポンド = 0.45359237kg"],

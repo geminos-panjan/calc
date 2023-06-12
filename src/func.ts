@@ -48,13 +48,6 @@ export const funcs: { [key: string]: Func } = {
       "mを底とするnの対数",
     ],
   },
-  exp: {
-    funcs: [
-      { args: 0, func: (n) => Math.E },
-      { args: 1, func: (n) => Math.exp(n[0]) },
-    ],
-    description: ["1. exp()", "ネイピア数", "2. exp(n)", "ネイピア数のn乗"],
-  },
   rand: {
     funcs: [
       { args: 0, func: (n) => Math.random() },
