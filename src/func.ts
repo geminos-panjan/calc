@@ -102,21 +102,14 @@ export const funcs: { [key: string]: Func } = {
           if (n.length === 0) {
             return Date.now();
           }
-          let t = n[0];
           const d = new Date();
-          d.setMilliseconds(t % 1000);
-          t = Math.floor(t / 1000);
-          d.setSeconds(t % 100);
-          t = Math.floor(t / 100);
-          d.setMinutes(t % 100);
-          t = Math.floor(t / 100);
-          d.setHours(t % 100);
-          t = Math.floor(t / 100);
-          d.setDate(t % 100);
-          t = Math.floor(t / 100);
-          d.setMonth((t % 100) - 1);
-          t = Math.floor(t / 100);
-          d.setFullYear(t);
+          d.setMilliseconds(n[0] % 1000);
+          d.setSeconds((n[0] / 1e3) % 100);
+          d.setMinutes((n[0] / 1e5) % 100);
+          d.setHours((n[0] / 1e7) % 100);
+          d.setDate((n[0] / 1e9) % 100);
+          d.setMonth(((n[0] / 1e11) % 100) - 1);
+          d.setFullYear(n[0] / 1e13);
           return d.getTime();
         },
       },
@@ -133,14 +126,13 @@ export const funcs: { [key: string]: Func } = {
       {
         args: 1,
         func: (n) => {
-          const m = n[0];
-          if (m < 1) {
+          if (n[0] < 0) {
+            throw new InvalidArgsError("fact(n), n >= 0");
           }
-          let res = 1;
-          for (let i = 0; i < m; i++) {
-            res *= m - i;
-          }
-          return res;
+          return new Array(Math.floor(n[0]))
+            .fill(0)
+            .map((_, i) => i + 1)
+            .reduce((a, b) => a * b);
         },
       },
     ],
@@ -238,3 +230,8 @@ export const funcs: { [key: string]: Func } = {
     description: ["1. sqrt(n)", "nの平方根", "2. sqrt(n, m)", "nのm乗根"],
   },
 };
+
+const time = funcs.time.funcs[0].func([2023_06_12_15_50_00_000]);
+console.log(time);
+console.log(funcs.date.funcs[0].func([time]));
+console.log(funcs.fact.funcs[0].func([4]));
