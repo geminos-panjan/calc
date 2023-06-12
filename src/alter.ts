@@ -39,7 +39,11 @@ export const alters: { [key: string]: Alter } = {
           if (n[1] < 2 || 64 < n[1]) {
             throw new InvalidArgsError("cvtbase(n), 2 <= n <= 64");
           }
-          return convertBase(n[0], n[1]) + "(" + String(n[1] + ")");
+          return (
+            convertBase(Math.floor(n[0]), Math.floor(n[1])) +
+            "(" +
+            String(n[1] + ")")
+          );
         },
       },
     ],

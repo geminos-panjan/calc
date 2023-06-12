@@ -226,6 +226,10 @@ export const funcs: { [key: string]: Func } = {
     ],
     description: ["1. sqrt(n)", "nの平方根", "2. sqrt(n, m)", "nのm乗根"],
   },
+  floor: {
+    funcs: [{ args: 1, func: (n) => Math.floor(n[0]) }],
+    description: ["floor(n)", "n以下の最大の整数"],
+  },
 };
 
 // const time = funcs.time.funcs[1].func([Number("20230612155000000")]);
