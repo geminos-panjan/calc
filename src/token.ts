@@ -45,7 +45,7 @@ const parsers: Parser[] = [
   { pattern: /^0b[01_]+/i, type: tt.BINARY },
   { pattern: /^0x[\da-f_]+/i, type: tt.HEX },
   {
-    pattern: /^([\d_]*\.[\d_]+|[\d_]+\.[\d_]*)(e[+-]?[\d_]+)?/i,
+    pattern: /^([\d_]*\.[\d_]+|[\d_]+\.[\d_]*|[\d_]+)(e[+-]?[\d_]+)?/i,
     type: tt.FLOAT,
   },
   { pattern: /^[\d_]+/, type: tt.INTEGER },
@@ -136,3 +136,10 @@ const echoTokenList = (s: string) => {
 // console.log(echoTokenList("00b12"));
 // console.log(echoTokenList("12x32"));
 // console.log(echoTokenList("out"));
+// console.log(echoTokenList("1."));
+// console.log(echoTokenList(".01"));
+// console.log(echoTokenList("1e3"));
+// console.log(echoTokenList("1e3"));
+// console.log(echoTokenList("1.e3"));
+// console.log(echoTokenList(".1e+3"));
+// console.log(echoTokenList("1e-3"));
