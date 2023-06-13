@@ -29,7 +29,8 @@ export type ConstantKey =
   | "minutes"
   | "hours"
   | "days"
-  | "weeks";
+  | "weeks"
+  | "rad";
 
 export const constants: { [key in ConstantKey]: Constant } = {
   pi: {
@@ -135,5 +136,9 @@ export const constants: { [key in ConstantKey]: Constant } = {
   weeks: {
     value: 6048e5,
     description: ["weeks", "1w = 7d"],
+  },
+  rad: {
+    value: Math.PI / 180,
+    description: ["rad", "1rad = π / 180[°]"],
   },
 };

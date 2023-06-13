@@ -1,6 +1,5 @@
 import { MyDate } from "./compornents/date.js";
 import { InvalidArgsError, ZeroDivisionError } from "../error.js";
-import { deg2rad, rad2deg } from "./compornents/radian.js";
 import { gcd } from "./compornents/euclid.js";
 
 type NumericFunction = {
@@ -14,8 +13,6 @@ export type NumericFunctionKey =
   | "date"
   | "time"
   | "fact"
-  | "deg2rad"
-  | "rad2deg"
   | "sin"
   | "cos"
   | "tan"
@@ -120,22 +117,10 @@ export const numericFuncs: { [key in NumericFunctionKey]: NumericFunction } = {
     },
     description: ["fact(n)", "nの階乗"],
   },
-  deg2rad: {
-    funcs: {
-      1: (n) => deg2rad(n[0]),
-    },
-    description: ["deg2rad(θ)", "θ[°]を弧度に変換"],
-  },
-  rad2deg: {
-    funcs: {
-      1: (n) => rad2deg(n[0]),
-    },
-    description: ["rad2deg(θ)", "θ[rad]を度に変換"],
-  },
   sin: {
     funcs: {
       1: (n) => {
-        return Math.sin(deg2rad(n[0]));
+        return Math.sin((n[0] * Math.PI) / 180);
       },
     },
     description: ["sin(θ)", "θ[°]での正弦"],
@@ -143,7 +128,7 @@ export const numericFuncs: { [key in NumericFunctionKey]: NumericFunction } = {
   cos: {
     funcs: {
       1: (n) => {
-        return Math.cos(deg2rad(n[0]));
+        return Math.cos((n[0] * Math.PI) / 180);
       },
     },
     description: ["cos(θ)", "θ[°]での余弦"],
@@ -151,21 +136,21 @@ export const numericFuncs: { [key in NumericFunctionKey]: NumericFunction } = {
   tan: {
     funcs: {
       1: (n) => {
-        return Math.tan(deg2rad(n[0]));
+        return Math.tan((n[0] * Math.PI) / 180);
       },
     },
     description: ["tan(θ)", "θ[°]での正接"],
   },
   asin: {
-    funcs: { 1: (n) => rad2deg(Math.asin(n[0])) },
+    funcs: { 1: (n) => Math.asin(n[0]) / (Math.PI / 180) },
     description: ["asin(n)", "nでの逆正弦"],
   },
   acos: {
-    funcs: { 1: (n) => rad2deg(Math.acos(n[0])) },
+    funcs: { 1: (n) => Math.acos(n[0]) / (Math.PI / 180) },
     description: ["acos(n)", "nでの逆余弦"],
   },
   atan: {
-    funcs: { 1: (n) => rad2deg(Math.atan(n[0])) },
+    funcs: { 1: (n) => Math.atan(n[0]) / (Math.PI / 180) },
     description: ["atan(n)", "nでの逆正接"],
   },
   gcd: {
