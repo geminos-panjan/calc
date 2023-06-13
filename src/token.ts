@@ -1,11 +1,13 @@
-import { alters } from "./alter.js";
 import { constants } from "./constant.js";
-import { funcs } from "./func.js";
+import { numericFuncs } from "./func/numeric_func.js";
+import { stringFuncs } from "./func/string_func.js";
+import { reduceFuncs } from "./func/reduce_func.js";
 
 export const tokenTypes = {
   ERROR: "ERROR",
   NUMBER: "NUMBER",
   INTEGER: "INTEGER",
+  EXPONENT: "EXPONENT",
   FLOAT: "FLOAT",
   BINARY: "BINARY",
   HEX: "HEX",
@@ -45,7 +47,11 @@ const parsers: Parser[] = [
   { pattern: /^0b[01_]+/i, type: tt.BINARY },
   { pattern: /^0x[\da-f_]+/i, type: tt.HEX },
   {
-    pattern: /^([\d_]*\.[\d_]+|[\d_]+\.[\d_]*|[\d_]+)(e[+-]?[\d_]+)?/i,
+    pattern: /^([\d_]*\.[\d_]+|[\d_]+\.[\d_]*|[\d_]+)e[+-]?[\d_]+/i,
+    type: tt.EXPONENT,
+  },
+  {
+    pattern: /^([\d_]*\.[\d_]+|[\d_]+\.[\d_]*)/i,
     type: tt.FLOAT,
   },
   { pattern: /^[\d_]+/, type: tt.INTEGER },
@@ -91,16 +97,11 @@ export const createTokenList = (text: string, tokens?: Token[]): Token[] => {
     return createTokenList(text.slice(match[0].length), tokens);
   }
   const type = ((type: TokenType, match: string) => {
-    if (
-      ([tt.BINARY, tt.HEX, tt.FLOAT, tt.INTEGER] as TokenType[]).includes(type)
-    ) {
-      return tt.NUMBER;
-    }
     if (type === tt.IDENTIFIER) {
       if (match in constants) {
         return tt.CONSTANT;
       }
-      if (match in Object.assign({}, funcs, alters)) {
+      if (match in Object.assign({}, numericFuncs, reduceFuncs, stringFuncs)) {
         return tt.FUNCTION;
       }
       return tt.ERROR;
@@ -143,3 +144,4 @@ const echoTokenList = (s: string) => {
 // console.log(echoTokenList("1.e3"));
 // console.log(echoTokenList(".1e+3"));
 // console.log(echoTokenList("1e-3"));
+// console.log(echoTokenList("2 * 3"));

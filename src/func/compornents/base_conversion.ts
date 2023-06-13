@@ -4,10 +4,15 @@ const CHARS =
 export const decimal = (nonDecimal: string, base: number) => {
   const nums: { [key: string]: number } = {};
   Array.from(CHARS).forEach((c, i) => (nums[c] = i));
-  return Array.from(nonDecimal).reduce(
-    (p, c, i) => p + nums[c] * base ** (nonDecimal.length - 1 - i),
-    0
-  );
+  return Array.from(nonDecimal).reduce((p, c, i) => {
+    if (isNaN(p)) {
+      return NaN;
+    }
+    if (!(c in nums)) {
+      return NaN;
+    }
+    return p + nums[c] * base ** (nonDecimal.length - 1 - i);
+  }, 0);
 };
 
 export const convertBase = (

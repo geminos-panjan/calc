@@ -3,7 +3,35 @@ type Constant = {
   description: string[];
 };
 
-export const constants: { [key: string]: Constant } = {
+export type ConstantKey =
+  | "pi"
+  | "e"
+  | "lbm"
+  | "inch"
+  | "feet"
+  | "yard"
+  | "mile"
+  | "kt"
+  | "n"
+  | "u"
+  | "m"
+  | "k"
+  | "M"
+  | "G"
+  | "T"
+  | "Ki"
+  | "Mi"
+  | "Gi"
+  | "Ti"
+  | "c"
+  | "g"
+  | "seconds"
+  | "minutes"
+  | "hours"
+  | "days"
+  | "weeks";
+
+export const constants: { [key in ConstantKey]: Constant } = {
   pi: {
     value: Math.PI,
     description: ["pi", "円周率"],
@@ -87,5 +115,25 @@ export const constants: { [key: string]: Constant } = {
   g: {
     value: 9.806_65,
     description: ["g", "重力加速度, 9.806 65m/s^2"],
+  },
+  seconds: {
+    value: 1e3,
+    description: ["seconds", "1s = 1000ms"],
+  },
+  minutes: {
+    value: 6e4,
+    description: ["minutes", "1min = 60s"],
+  },
+  hours: {
+    value: 36e5,
+    description: ["hours", "1h = 60min"],
+  },
+  days: {
+    value: 864e5,
+    description: ["days", "1d = 24h"],
+  },
+  weeks: {
+    value: 6048e5,
+    description: ["weeks", "1w = 7d"],
   },
 };
