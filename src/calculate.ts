@@ -1,5 +1,5 @@
 import { createSyntaxTree } from "./syntax_tree.js";
-import { createTokenList, tokenTypes as tt } from "./token.js";
+import { TokenType, createTokenList } from "./token.js";
 
 export type FormatType = "DECIMAL" | "BINARY" | "HEX" | "EXPONENT";
 
@@ -28,7 +28,7 @@ export const calculate = (
   }
   if (format === undefined) {
     const token = tokens.find((t) =>
-      ([tt.BINARY, tt.HEX, tt.EXPONENT] as string[]).includes(t.type)
+      (["BINARY", "HEX", "EXPONENT"] as TokenType[]).includes(t.type)
     );
     if (token !== undefined) {
       return formatsTypes[token.type as FormatType](node.value);

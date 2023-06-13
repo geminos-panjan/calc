@@ -3,30 +3,25 @@ import { numericFuncs } from "./func/numeric_func.js";
 import { stringFuncs } from "./func/string_func.js";
 import { reduceFuncs } from "./func/reduce_func.js";
 
-export const tokenTypes = {
-  ERROR: "ERROR",
-  NUMBER: "NUMBER",
-  INTEGER: "INTEGER",
-  EXPONENT: "EXPONENT",
-  FLOAT: "FLOAT",
-  BINARY: "BINARY",
-  HEX: "HEX",
-  STRING: "STRING",
-  IDENTIFIER: "IDENTIFIER",
-  CONSTANT: "CONSTANT",
-  FUNCTION: "FUNCTION",
-  TERM_OPERATOR: "TERM_OPERATOR",
-  FACTOR_OPERATOR: "FACTOR_OPERATOR",
-  EXPONENT_OPERATOR: "EXPONENT_OPERATOR",
-  OPEN_PAREN: "OPEN_PAREN",
-  CLOSE_PAREN: "CLOSE_PAREN",
-  OPEN_BLACKET: "OPEN_BLACKET",
-  CLOSE_BLACKET: "CLOSE_BLACKET",
-  COMMA: "COMMA",
-} as const;
-const tt = tokenTypes;
-export type TokenType = (typeof tt)[keyof typeof tt];
-
+export type TokenType =
+  | "ERROR"
+  | "INTEGER"
+  | "EXPONENT"
+  | "FLOAT"
+  | "BINARY"
+  | "HEX"
+  | "STRING"
+  | "IDENTIFIER"
+  | "CONSTANT"
+  | "FUNCTION"
+  | "TERM_OPERATOR"
+  | "FACTOR_OPERATOR"
+  | "EXPONENT_OPERATOR"
+  | "OPEN_PAREN"
+  | "CLOSE_PAREN"
+  | "OPEN_BLACKET"
+  | "CLOSE_BLACKET"
+  | "COMMA";
 export class Token {
   type;
   word;
@@ -44,27 +39,27 @@ type Parser = {
 
 const parsers: Parser[] = [
   { pattern: /^\s+/ },
-  { pattern: /^0b[01_]+/i, type: tt.BINARY },
-  { pattern: /^0x[\da-f_]+/i, type: tt.HEX },
+  { pattern: /^0b[01_]+/i, type: "BINARY" },
+  { pattern: /^0x[\da-f_]+/i, type: "HEX" },
   {
     pattern: /^([\d_]*\.[\d_]+|[\d_]+\.[\d_]*|[\d_]+)e[+-]?[\d_]+/i,
-    type: tt.EXPONENT,
+    type: "EXPONENT",
   },
   {
     pattern: /^([\d_]*\.[\d_]+|[\d_]+\.[\d_]*)/i,
-    type: tt.FLOAT,
+    type: "FLOAT",
   },
-  { pattern: /^[\d_]+/, type: tt.INTEGER },
-  { pattern: /^"(\\"|[^"])*"/, type: tt.STRING },
-  { pattern: /^[a-z]\w*/i, type: tt.IDENTIFIER },
-  { pattern: /^[\+\-]/, type: tt.TERM_OPERATOR },
-  { pattern: /^[\*\/%]/, type: tt.FACTOR_OPERATOR },
-  { pattern: /^\^/, type: tt.EXPONENT_OPERATOR },
-  { pattern: /^\(/, type: tt.OPEN_PAREN },
-  { pattern: /^\)/, type: tt.CLOSE_PAREN },
-  { pattern: /^\[/, type: tt.OPEN_BLACKET },
-  { pattern: /^\]/, type: tt.CLOSE_BLACKET },
-  { pattern: /^\,/, type: tt.COMMA },
+  { pattern: /^[\d_]+/, type: "INTEGER" },
+  { pattern: /^"(\\"|[^"])*"/, type: "STRING" },
+  { pattern: /^[a-z]\w*/i, type: "IDENTIFIER" },
+  { pattern: /^[\+\-]/, type: "TERM_OPERATOR" },
+  { pattern: /^[\*\/%]/, type: "FACTOR_OPERATOR" },
+  { pattern: /^\^/, type: "EXPONENT_OPERATOR" },
+  { pattern: /^\(/, type: "OPEN_PAREN" },
+  { pattern: /^\)/, type: "CLOSE_PAREN" },
+  { pattern: /^\[/, type: "OPEN_BLACKET" },
+  { pattern: /^\]/, type: "CLOSE_BLACKET" },
+  { pattern: /^\,/, type: "COMMA" },
 ];
 
 export const createTokenList = (text: string, tokens?: Token[]): Token[] => {
@@ -85,26 +80,26 @@ export const createTokenList = (text: string, tokens?: Token[]): Token[] => {
   }
   const parser = parsers.find((p) => p.pattern.test(text));
   if (parser === undefined) {
-    tokens.push(new Token(tt.ERROR, text[0]));
+    tokens.push(new Token("ERROR", text[0]));
     return createTokenList(text.slice(1), tokens);
   }
   const match = parser.pattern.exec(text);
   if (match == null) {
-    tokens.push(new Token(tt.ERROR, text[0]));
+    tokens.push(new Token("ERROR", text[0]));
     return createTokenList(text.slice(1), tokens);
   }
   if (parser.type === undefined) {
     return createTokenList(text.slice(match[0].length), tokens);
   }
   const type = ((type: TokenType, match: string) => {
-    if (type === tt.IDENTIFIER) {
+    if (type === "IDENTIFIER") {
       if (match in constants) {
-        return tt.CONSTANT;
+        return "CONSTANT";
       }
       if (match in Object.assign({}, numericFuncs, reduceFuncs, stringFuncs)) {
-        return tt.FUNCTION;
+        return "FUNCTION";
       }
-      return tt.ERROR;
+      return "ERROR";
     }
     return type;
   })(parser.type, match[0]);
