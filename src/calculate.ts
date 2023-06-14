@@ -16,6 +16,13 @@ export const formatsTypes: { [key in FormatType]: (n: number) => string } = {
   EXPONENT: (n) => n.toExponential(),
 };
 
+const roundFloat = (n: number) => {
+  if (Number.isInteger(n)) {
+    return n;
+  }
+  return Math.round(n * 1e6) * 1e-6;
+};
+
 export const calculate = (
   text: string,
   format?: FormatType,
@@ -26,16 +33,17 @@ export const calculate = (
   if (node.value === undefined) {
     return node.text;
   }
+  const value = roundFloat(node.value);
   if (format === undefined) {
     const token = tokens.find((t) =>
       (["BINARY", "HEX", "EXPONENT"] as TokenType[]).includes(t.type)
     );
     if (token !== undefined) {
-      return formatsTypes[token.type as FormatType](node.value);
+      return formatsTypes[token.type as FormatType](value);
     }
-    return node.value.toString();
+    return value.toString();
   }
-  return formatsTypes[format](node.value);
+  return formatsTypes[format](value);
 };
 
 // console.log(calculate("2 * 3"));
@@ -57,3 +65,4 @@ export const calculate = (
 // console.log(calculate("22pi/22"));
 // console.log(calculate("0b101", "DECIMAL"));
 // console.log(calculate("0xf", "DECIMAL"));
+// console.log(calculate("0.1+0.2"));
