@@ -6,7 +6,7 @@ import { suddenDeath } from "./compornents/sudden.js";
 import { full2half } from "./compornents/full2half.js";
 
 type StringFunction = {
-  funcs: { [key: number]: (s: string[]) => string };
+  funcs: { [key: number]: (s: string[]) => number | string };
   description: string[];
 };
 
@@ -20,7 +20,8 @@ export type StringFunctionKey =
   | "dash"
   | "full2half"
   | "space"
-  | "sudden";
+  | "sudden"
+  | "length";
 
 export const stringFuncs: { [key in StringFunctionKey]: StringFunction } = {
   prime: {
@@ -203,5 +204,11 @@ export const stringFuncs: { [key in StringFunctionKey]: StringFunction } = {
       "＞　突然の死　＜",
       "￣Y^Y^Y^Y^Y^￣",
     ],
+  },
+  length: {
+    funcs: {
+      1: (s) => Array.from(s[0]).length,
+    },
+    description: ['length("s")', "sの文字数"],
   },
 };

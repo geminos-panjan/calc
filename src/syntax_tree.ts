@@ -163,7 +163,13 @@ const getValue = (key: string, args: Node[]) => {
     if (func === undefined) {
       throw new InvalidArgsError("Args length is invalid");
     }
-    const text = '"' + func(args.map((n) => n.text)) + '"';
+    const res = func(args.map((n) => n.text));
+    if (typeof res === "number") {
+      const value = res;
+      const text = res.toString();
+      return { value, text };
+    }
+    const text = res;
     return { text };
   }
   return undefined;
@@ -431,3 +437,5 @@ const echoSyntaxTree = (text: string) => {
 // console.log(echoSyntaxTree("exp("));
 // console.log(echoSyntaxTree("exp()"));
 // console.log(echoSyntaxTree("exp()"));
+// console.log(echoSyntaxTree('length("hoge")'));
+// console.log(echoSyntaxTree('length("🍣")'));
