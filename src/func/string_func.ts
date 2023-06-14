@@ -4,6 +4,7 @@ import { InvalidArgsError } from "../error.js";
 import { expressPrimeFactors } from "./compornents/prime_factor.js";
 import { suddenDeath } from "./compornents/sudden.js";
 import { full2half } from "./compornents/full2half.js";
+import { gcd } from "./compornents/euclid.js";
 
 type StringFunction = {
   funcs: { [key: number]: (s: string[]) => number | string };
@@ -21,7 +22,8 @@ export type StringFunctionKey =
   | "full2half"
   | "space"
   | "sudden"
-  | "length";
+  | "length"
+  | "reduct";
 
 export const stringFuncs: { [key in StringFunctionKey]: StringFunction } = {
   prime: {
@@ -211,4 +213,22 @@ export const stringFuncs: { [key in StringFunctionKey]: StringFunction } = {
     },
     description: ['length("s")', "sの文字数"],
   },
+  reduct: {
+    funcs: {
+      2: (s) => {
+        const n = Number(s[0]);
+        const m = Number(s[1]);
+        if (isNaN(n) || isNaN(m)) {
+          throw new InvalidArgsError(`reduct(n, m), Not a number`);
+        }
+        const g = gcd(n, m);
+        const x = n / g;
+        const y = m / g;
+        return `${x} : ${y}`;
+      },
+    },
+    description: ["reduct(n, m)", "nとmを約分"],
+  },
 };
+
+// console.log(stringFuncs.reduct.funcs[2](["153", "132"]));
