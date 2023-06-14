@@ -38,7 +38,7 @@ export const calculate = (
   const tokens = createTokenList(text.replace("ans", ans));
   const node = createSyntaxTree(tokens);
   if (node.value === undefined) {
-    return node.text;
+    return `"${node.text}"`;
   }
   const value = roundFloat(node.value);
   if (format !== undefined) {
@@ -72,8 +72,8 @@ export const calculate = (
 // console.log(calculate("22pi/22"));
 // console.log(calculate("0b101", "DECIMAL"));
 // console.log(calculate("0xf", "DECIMAL"));
-console.log(calculate("0.1+0.2"));
+// console.log(calculate("0.1+0.2"));
 // console.log(calculate("0.1*9*1000"));
-console.log(calculate("asin(0.5)"));
-console.log(calculate("1/3"));
-console.log(calculate("0.01+0.02"));
+// console.log(calculate("asin(0.5)"));
+// console.log(calculate("1/3"));
+// console.log(calculate("0.01+0.02"));
