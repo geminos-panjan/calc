@@ -1,5 +1,5 @@
 import { createSyntaxTree } from "./syntax_tree.js";
-import { TokenType, createTokenList } from "./token.js";
+import { Token, TokenType, createTokenList } from "./token.js";
 
 export type FormatType = "DECIMAL" | "BINARY" | "HEX" | "EXPONENT";
 
@@ -17,10 +17,17 @@ export const formatsTypes: { [key in FormatType]: (n: number) => string } = {
 };
 
 const roundFloat = (n: number) => {
-  if (Number.isInteger(n)) {
-    return n;
+  const text = n.toString();
+  const zero = /\.\d*?[^0]?(0{6,}\d*)/.exec(text);
+  if (zero != undefined) {
+    return Number(text.replace(zero[1], ""));
   }
-  return Math.round(n * 1e6) * 1e-6;
+  const nine = /(\.\d*?[^9]?)9{6,}\d*/.exec(text);
+  if (nine != undefined) {
+    const exp = 10 ** nine[1].length;
+    return Math.round(n * exp) / exp;
+  }
+  return n;
 };
 
 export const calculate = (
@@ -34,16 +41,16 @@ export const calculate = (
     return node.text;
   }
   const value = roundFloat(node.value);
-  if (format === undefined) {
-    const token = tokens.find((t) =>
-      (["BINARY", "HEX", "EXPONENT"] as TokenType[]).includes(t.type)
-    );
-    if (token !== undefined) {
-      return formatsTypes[token.type as FormatType](value);
-    }
-    return value.toString();
+  if (format !== undefined) {
+    return formatsTypes[format](value);
   }
-  return formatsTypes[format](value);
+  const token = tokens.find((t) =>
+    (["BINARY", "HEX", "EXPONENT"] as TokenType[]).includes(t.type)
+  );
+  if (token !== undefined) {
+    return formatsTypes[token.type as FormatType](value);
+  }
+  return value.toString();
 };
 
 // console.log(calculate("2 * 3"));
@@ -65,4 +72,8 @@ export const calculate = (
 // console.log(calculate("22pi/22"));
 // console.log(calculate("0b101", "DECIMAL"));
 // console.log(calculate("0xf", "DECIMAL"));
-// console.log(calculate("0.1+0.2"));
+console.log(calculate("0.1+0.2"));
+// console.log(calculate("0.1*9*1000"));
+console.log(calculate("asin(0.5)"));
+console.log(calculate("1/3"));
+console.log(calculate("0.01+0.02"));
