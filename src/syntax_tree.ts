@@ -150,6 +150,11 @@ const getNumericFunc = (key: string, args: Node[]) => {
 const getValue = (key: string, args: Node[]) => {
   const func = getNumericFunc(key, args);
   if (func !== undefined) {
+    if (args.length === 0) {
+      const value = func([]);
+      const text = value.toString();
+      return { value, text };
+    }
     const invalid = args.find((n) => n.value === undefined);
     if (invalid !== undefined) {
       throw new InvalidArgsError(`"${invalid.text}" is invalid argument`);
@@ -185,14 +190,14 @@ const parseFunc = (tokens: Token[]) => {
   if (tokens[0].type !== "FUNCTION") {
     return undefined;
   }
-  if (!(1 in tokens) && tokens[1].type !== "OPEN_PAREN") {
+  if (!(1 in tokens) || tokens[1].type !== "OPEN_PAREN") {
     throw new UnexpectedTokenError(`"${tokens[1].word}" instead of "("`);
   }
   const res = parseArgument(tokens.slice(2));
-  if (res === undefined) {
-    return undefined;
-  }
-  const v = getValue(tokens[0].word, res.node.children);
+  const v = getValue(
+    tokens[0].word,
+    res !== undefined ? res.node.children : []
+  );
   if (v === undefined) {
     return undefined;
   }
@@ -439,3 +444,4 @@ const echoSyntaxTree = (text: string) => {
 // console.log(echoSyntaxTree("exp()"));
 // console.log(echoSyntaxTree('length("hoge")'));
 // console.log(echoSyntaxTree('length("🍣")'));
+// console.log(echoSyntaxTree("date()"));
