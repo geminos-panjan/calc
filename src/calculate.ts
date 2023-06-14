@@ -1,5 +1,5 @@
 import { createSyntaxTree } from "./syntax_tree.js";
-import { Token, TokenType, createTokenList } from "./token.js";
+import { TokenType, createTokenList } from "./token.js";
 
 export type FormatType = "DECIMAL" | "BINARY" | "HEX" | "EXPONENT";
 
