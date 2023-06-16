@@ -5,6 +5,7 @@ import { expressPrimeFactors } from "./compornents/prime_factor.js";
 import { suddenDeath } from "./compornents/sudden.js";
 import { full2half } from "./compornents/full2half.js";
 import { gcd } from "./compornents/euclid.js";
+import { MyDate } from "./compornents/date.js";
 
 type StringFunction = {
   funcs: { [key: number]: (s: string[]) => number | string };
@@ -23,7 +24,8 @@ export type StringFunctionKey =
   | "space"
   | "sudden"
   | "length"
-  | "reduct";
+  | "reduct"
+  | "date";
 
 export const stringFuncs: { [key in StringFunctionKey]: StringFunction } = {
   prime: {
@@ -228,6 +230,26 @@ export const stringFuncs: { [key in StringFunctionKey]: StringFunction } = {
       },
     },
     description: ["reduct(n, m)", "nとmを約分"],
+  },
+  date: {
+    funcs: {
+      0: (s) => new MyDate().format("yyyy-MM-dd HH:mm:ss.SSS"),
+      1: (s) => {
+        const d = new MyDate();
+        const n = Number(s[0]);
+        if (isNaN(n)) {
+          throw new InvalidArgsError(`date(t), "${s[0]}" is not a number`);
+        }
+        d.setTime(n);
+        return d.format("yyyy-MM-dd HH:mm:ss.SSS");
+      },
+    },
+    description: [
+      "1. date()",
+      '現在の時間を"yyyy-MM-dd HH:mm:ss.SSS"形式で示す',
+      "2. date(t)",
+      'UNIX時間t[ミリ秒]から"yyyy-MM-dd HH:mm:ss.SSS形式の時間に変換',
+    ],
   },
 };
 

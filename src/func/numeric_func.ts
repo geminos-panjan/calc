@@ -1,4 +1,3 @@
-import { MyDate } from "./compornents/date.js";
 import { InvalidArgsError, ZeroDivisionError } from "../error.js";
 import { gcd } from "./compornents/euclid.js";
 
@@ -10,7 +9,6 @@ type NumericFunction = {
 export type NumericFunctionKey =
   | "log"
   | "rand"
-  | "date"
   | "time"
   | "fact"
   | "sin"
@@ -63,22 +61,6 @@ export const numericFuncs: { [key in NumericFunctionKey]: NumericFunction } = {
       "1以上n以下のランダムな整数",
       "3. rand(n, m)",
       "n以上m未満のランダムな整数",
-    ],
-  },
-  date: {
-    funcs: {
-      0: (n) => Number(new MyDate().format("yyyyMMddHHmmssSSS")),
-      1: (n) => {
-        const d = new MyDate();
-        d.setTime(n[0]);
-        return Number(d.format("yyyyMMddHHmmssSSS"));
-      },
-    },
-    description: [
-      "1. date()",
-      "現在の時間をyyyyMMddHHmmssSSS形式で示す",
-      "2. date(n)",
-      "UNIX時間n[ミリ秒]からyyyyMMddHHmmssSSS形式の時間に変換",
     ],
   },
   time: {
