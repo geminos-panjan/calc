@@ -1,4 +1,4 @@
 .vscode
-dist
-src/
+src
+test
 tsconfig.json
