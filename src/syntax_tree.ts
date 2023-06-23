@@ -190,7 +190,10 @@ const parseFunc = (tokens: Token[]) => {
   if (tokens[0].type !== "FUNCTION") {
     return undefined;
   }
-  if (!(1 in tokens) || tokens[1].type !== "OPEN_PAREN") {
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  if (tokens[1].type !== "OPEN_PAREN") {
     throw new UnexpectedTokenError(`"${tokens[1].word}" instead of "("`);
   }
   const res = parseArgument(tokens.slice(2));

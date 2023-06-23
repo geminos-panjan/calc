@@ -77,3 +77,6 @@ export const calculate = (
 // console.log(calculate("asin(0.5)"));
 // console.log(calculate("1/3"));
 // console.log(calculate("0.01+0.02"));
+// console.log(calculate("pi"));
+// console.log(calculate("log("));
+// console.log(calculate("log"));
