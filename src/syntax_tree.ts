@@ -381,16 +381,17 @@ const parseExpression = (
 };
 
 export const createSyntaxTree = (tokens: Token[]) => {
-  if (!(0 in tokens)) {
+  const nonSpaces = tokens.filter((t) => t.type !== "SPACE");
+  if (!(0 in nonSpaces)) {
     throw new UnexpectedEndError();
   }
-  const error = tokens.find((t) => t.type === "ERROR");
+  const error = nonSpaces.find((t) => t.type === "ERROR");
   if (error !== undefined) {
     throw new InvalidTokenError(`"${error.word}"`);
   }
-  const res = parseExpression(tokens);
+  const res = parseExpression(nonSpaces);
   if (res === undefined) {
-    throw new InvalidTokenError(`"${tokens[0].word}"`);
+    throw new InvalidTokenError(`"${nonSpaces[0].word}"`);
   }
   if (0 in res.tokens) {
     throw new UnexpectedTokenError(

@@ -5,6 +5,7 @@ import { reduceFuncs } from "./func/reduce_func.js";
 
 export type TokenType =
   | "ERROR"
+  | "SPACE"
   | "INTEGER"
   | "EXPONENT"
   | "FLOAT"
@@ -34,11 +35,11 @@ export class Token {
 
 type Parser = {
   pattern: RegExp;
-  type?: TokenType;
+  type: TokenType;
 };
 
 const parsers: Parser[] = [
-  { pattern: /^\s+/ },
+  { pattern: /^\s+/, type: "SPACE" },
   { pattern: /^0b[01_]+/i, type: "BINARY" },
   { pattern: /^0x[\da-f_]+/i, type: "HEX" },
   {
@@ -87,9 +88,6 @@ export const createTokenList = (text: string, tokens?: Token[]): Token[] => {
   if (match == null) {
     tokens.push(new Token("ERROR", text[0]));
     return createTokenList(text.slice(1), tokens);
-  }
-  if (parser.type === undefined) {
-    return createTokenList(text.slice(match[0].length), tokens);
   }
   const type = ((type: TokenType, match: string) => {
     if (type === "IDENTIFIER") {
