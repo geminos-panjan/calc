@@ -35,6 +35,9 @@ export const calculate = (
   format?: FormatType,
   ans: string = ""
 ) => {
+  if (text === "") {
+    return "";
+  }
   const tokens = createTokenList(text.replace("ans", ans));
   const node = createSyntaxTree(tokens);
   if (node.value === undefined) {
@@ -80,3 +83,4 @@ export const calculate = (
 // console.log(calculate("pi"));
 // console.log(calculate("log("));
 // console.log(calculate("log"));
+console.log(calculate(""));
