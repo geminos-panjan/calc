@@ -26,10 +26,12 @@ export type TokenType =
 export class Token {
   type;
   word;
+  depth;
 
-  constructor(type: TokenType, word: string) {
+  constructor(type: TokenType, word: string, depth: number = 0) {
     this.type = type;
     this.word = word;
+    this.depth = depth;
   }
 }
 
@@ -63,7 +65,11 @@ const parsers: Parser[] = [
   { pattern: /^\,/, type: "COMMA" },
 ];
 
-export const createTokenList = (text: string, tokens?: Token[]): Token[] => {
+export const createTokenList = (
+  text: string,
+  tokens?: Token[],
+  depth: number = 0
+): Token[] => {
   if (tokens === undefined) {
     const ary = Array.from(text);
     const openParens = ary.filter((a) => a === "(").length;
@@ -101,17 +107,28 @@ export const createTokenList = (text: string, tokens?: Token[]): Token[] => {
     }
     return type;
   })(parser.type, match[0]);
-  tokens.push(new Token(type, match[0]));
-  return createTokenList(text.slice(match[0].length), tokens);
+  const nextDepth = ((type: TokenType, depth: number) => {
+    if (type === "OPEN_PAREN") {
+      return depth + 1;
+    }
+    if (type === "CLOSE_PAREN") {
+      return depth - 1;
+    }
+    return depth;
+  })(parser.type, depth);
+  tokens.push(
+    new Token(type, match[0], type === "CLOSE_PAREN" ? depth - 1 : depth)
+  );
+  return createTokenList(text.slice(match[0].length), tokens, nextDepth);
 };
 
 const echoTokenList = (s: string) => {
   return (
-    "[" +
+    "[\n" +
     createTokenList(s)
-      .map((t) => `[${t.type}, ${t.word}]`)
-      .join(", ") +
-    "]"
+      .map((t) => `  { t: ${t.type},\tw: "${t.word}",\td: ${t.depth} }`)
+      .join(", \n") +
+    "\n]"
   );
 };
 
@@ -138,3 +155,4 @@ const echoTokenList = (s: string) => {
 // console.log(echoTokenList(".1e+3"));
 // console.log(echoTokenList("1e-3"));
 // console.log(echoTokenList("2 * 3"));
+// console.log(echoTokenList("1+2*(3/(1+2))"));
