@@ -238,7 +238,7 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
     return new ParseResult(res.tokens, node);
   }
   if (tokens[0].type === "OPEN_PAREN") {
-    if (!(0 in tokens)) {
+    if (!(1 in tokens)) {
       throw new UnexpectedEndError();
     }
     const res = parseExpression(tokens.slice(1));
@@ -449,3 +449,4 @@ const echoSyntaxTree = (text: string) => {
 // console.log(echoSyntaxTree('length("hoge")'));
 // console.log(echoSyntaxTree('length("🍣")'));
 // console.log(echoSyntaxTree("date()"));
+// console.log(echoSyntaxTree("("));
