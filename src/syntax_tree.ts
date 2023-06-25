@@ -334,7 +334,15 @@ const parseExpression = (
 };
 
 export const createSyntaxTree = (tokens: Token[]) => {
-  const nonSpaces = tokens.filter((t) => t.type !== "SPACE");
+  const openParens = tokens.filter((t) => t.type === "OPEN_PAREN").length;
+  const closeParens = tokens.filter((t) => t.type === "CLOSE_PAREN").length;
+  const placedParens =
+    openParens < closeParens
+      ? Array(closeParens - openParens)
+          .fill(new Token("OPEN_PAREN", "("))
+          .concat(tokens)
+      : tokens;
+  const nonSpaces = placedParens.filter((t) => t.type !== "SPACE");
   if (!(0 in nonSpaces)) {
     throw new UnexpectedEndError();
   }

@@ -65,21 +65,9 @@ const parsers: Parser[] = [
 
 export const createTokenList = (
   text: string,
-  tokens?: Token[],
+  tokens: Token[] = [],
   depth: number = 0
 ): Token[] => {
-  if (tokens === undefined) {
-    const ary = Array.from(text);
-    const openParens = ary.filter((a) => a === "(").length;
-    const closeParens = ary.filter((a) => a === ")").length;
-    if (openParens < closeParens) {
-      return createTokenList(
-        new Array(closeParens - openParens).fill("(").join("") + text,
-        []
-      );
-    }
-    return createTokenList(text, []);
-  }
   if (text === "") {
     return tokens;
   }
