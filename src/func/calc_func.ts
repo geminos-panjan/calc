@@ -27,7 +27,7 @@ export const funcs: { [key in CalcFunctionKey]: CalcFunction } = Object.assign(
   {
     help: {
       funcs: {
-        1: (s: string) => {
+        1: (s: any) => {
           if (s in constants) {
             return constants[s as ConstantKey].description.join(" ");
           }
@@ -41,7 +41,10 @@ export const funcs: { [key in CalcFunctionKey]: CalcFunction } = Object.assign(
     },
     search: {
       funcs: {
-        1: (s: string) => {
+        1: (s: any) => {
+          if (s === "") {
+            throw new InvalidArgsError('""');
+          }
           const ids = Object.keys(Object.assign({}, constants, funcs));
           return ids
             .filter((v) => v.startsWith(s))
