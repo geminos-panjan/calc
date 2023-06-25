@@ -111,6 +111,9 @@ const parseArgument = (
   if (!(0 in tokens) || tokens[0].type !== "COMMA") {
     return new ParseResult(tokens, node);
   }
+  if (!(1 in tokens)) {
+    return new ParseResult(tokens.slice(1), node);
+  }
   const res = parseExpression(tokens.slice(1));
   if (res === undefined) {
     return new ParseResult(tokens, node);
@@ -450,3 +453,4 @@ const echoSyntaxTree = (text: string) => {
 // console.log(echoSyntaxTree('length("🍣")'));
 // console.log(echoSyntaxTree("date()"));
 // console.log(echoSyntaxTree("("));
+// console.log(echoSyntaxTree("log(10,"));
