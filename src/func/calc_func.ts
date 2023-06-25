@@ -37,7 +37,7 @@ export const funcs: { [key in CalcFunctionKey]: CalcFunction } = Object.assign(
           throw new InvalidArgsError(`"${s}"`);
         },
       },
-      description: ['help("s")', "定数または関数sの説明を返す"],
+      description: ['help("s") 定数または関数sの説明を返す'],
     },
     search: {
       funcs: {
@@ -52,7 +52,7 @@ export const funcs: { [key in CalcFunctionKey]: CalcFunction } = Object.assign(
             .join(" ");
         },
       },
-      description: ['search("s")', "sから始まる定数または関数名を返す"],
+      description: ['search("s") sから始まる定数または関数名を返す'],
     },
   },
   colorFuncs,
