@@ -85,7 +85,11 @@ const parseString = (tokens: Token[]) => {
     return undefined;
   }
   const word = tokens[0].word;
-  const node = new Node("STRING", word.slice(1, word.length - 1), [tokens[0]]);
+  const value = word.slice(
+    1,
+    ['"', "'"].includes(word.slice(-1)) ? word.length - 1 : word.length
+  );
+  const node = new Node("STRING", value, [tokens[0]]);
   return new ParseResult(tokens.slice(1), node);
 };
 

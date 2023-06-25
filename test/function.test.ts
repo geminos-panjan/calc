@@ -12,6 +12,7 @@ const echoCalculation = (text: string) => {
 // console.log(echoCalculation("2^5"));
 // console.log(echoCalculation('help("rgb2hsl")'));
 // console.log(echoCalculation('search("a")'));
+// console.log(echoCalculation('search("a'));
 // console.log(echoCalculation("rgb2hsl(0xaabbcc)"));
 // console.log(echoCalculation("rgb2hsl('hoge')"));
 // console.log(echoCalculation("rgb2hsl(170, 187, 204)"));
