@@ -287,7 +287,9 @@ const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
     throw new UnexpectedTokenError(`${tokens[1].word}`);
   }
   if (["/", "%"].includes(tokens[0].word) && res.node.value === 0) {
-    throw new ZeroDivisionError(`${res.node.tokens.join("")} = 0`);
+    throw new ZeroDivisionError(
+      `"${res.node.tokens.map((t) => t.word).join("")}"`
+    );
   }
   const value = factorOperators[tokens[0].word](node.value, res.node.value);
   const resTokens = [...node.tokens, tokens[0], ...res.node.tokens];
