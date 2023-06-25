@@ -25,7 +25,8 @@ export type StringFunctionKey =
   | "sudden"
   | "length"
   | "reduct"
-  | "date";
+  | "date"
+  | "time";
 
 export const stringFuncs: { [key in StringFunctionKey]: StringFunction } = {
   prime: {
@@ -248,7 +249,37 @@ export const stringFuncs: { [key in StringFunctionKey]: StringFunction } = {
       "1. date()",
       '現在の時間を"yyyy-MM-dd HH:mm:ss.SSS"形式で示す',
       "2. date(t)",
-      'UNIX時間t[ミリ秒]から"yyyy-MM-dd HH:mm:ss.SSS形式の時間に変換',
+      'UNIX時間t[ミリ秒]から"yyyy-MM-dd HH:mm:ss.SSS"形式の時間に変換',
+    ],
+  },
+  time: {
+    funcs: {
+      0: (s) => Date.now(),
+      1: (s) => {
+        const regex =
+          /(\d{4})[^\d]*(\d{2})[^\d]*(\d{2})[^\d]*(\d{2})[^\d]*(\d{2})[^\d]*(\d{2})[^\d]*(\d{3})?/;
+        const m = regex.exec(s[0]);
+        if (m === null) {
+          throw new InvalidArgsError(s[0]);
+        }
+        const yyyy = Number(m[1]);
+        const MM = Number(m[2]) - 1;
+        const dd = Number(m[3]);
+        const HH = Number(m[4]);
+        const mm = Number(m[5]);
+        const ss = Number(m[6]);
+        const SSS = Number(m[7] ?? 0);
+        const d = new Date(yyyy, MM, dd, HH, mm, ss, SSS);
+        return d.getTime();
+      },
+    },
+    description: [
+      "1. time()",
+      "現在のUNIX時間[ミリ秒]",
+      "2. time(t)",
+      '"yyyyMMddHHmmssSSS"形式の時間tからUNIX時間[ミリ秒]に変換',
+      '"SSS"はなければ000とする',
+      "日付要素の間に文字が入っていても変換可",
     ],
   },
 };

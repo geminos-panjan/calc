@@ -83,4 +83,9 @@ export const calculate = (
 // console.log(calculate("pi"));
 // console.log(calculate("log("));
 // console.log(calculate("log"));
-console.log(calculate(""));
+// console.log(calculate(""));
+// console.log(calculate("date((time()+30days)"));
+// console.log(calculate("date((time()+months)"));
+// console.log(calculate("date((time()+365days)"));
+// console.log(calculate("date(time()+years)"));
+// console.log(calculate('date(time("2023-01-25 11:54:00.000"))'));

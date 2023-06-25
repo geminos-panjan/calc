@@ -9,7 +9,6 @@ type NumericFunction = {
 export type NumericFunctionKey =
   | "log"
   | "rand"
-  | "time"
   | "fact"
   | "sin"
   | "cos"
@@ -61,28 +60,6 @@ export const numericFuncs: { [key in NumericFunctionKey]: NumericFunction } = {
       "1以上n以下のランダムな整数",
       "3. rand(n, m)",
       "n以上m未満のランダムな整数",
-    ],
-  },
-  time: {
-    funcs: {
-      0: (n) => Date.now(),
-      1: (n) => {
-        const d = new Date();
-        d.setMilliseconds(n[0] % 1000);
-        d.setSeconds((n[0] / 1e3) % 100);
-        d.setMinutes((n[0] / 1e5) % 100);
-        d.setHours((n[0] / 1e7) % 100);
-        d.setDate((n[0] / 1e9) % 100);
-        d.setMonth(((n[0] / 1e11) % 100) - 1);
-        d.setFullYear(n[0] / 1e13);
-        return d.getTime();
-      },
-    },
-    description: [
-      "1. time()",
-      "現在のUNIX時間[ミリ秒]",
-      "2. time(n)",
-      "yyyyMMddHHmmssSSS形式の時間nからUNIX時間[ミリ秒]に変換",
     ],
   },
   fact: {
