@@ -21,6 +21,7 @@ type NodeType =
   | "EXPRESSION"
   | "TERM"
   | "FACTOR"
+  | "COEFFICIENT"
   | "EXPONENT"
   | "FUNCTION"
   | "ALTER"
@@ -229,7 +230,7 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
     if (!(1 in tokens)) {
       throw new UnexpectedEndError();
     }
-    const res = parseExponent(tokens.slice(1));
+    const res = parseFunc(tokens.slice(1));
     if (res === undefined || res.node.value === undefined) {
       throw new UnexpectedTokenError(`"${tokens[1].word}"`);
     }
@@ -263,9 +264,41 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
   return undefined;
 };
 
+const parseCoefficient = (tokens: Token[]) => {
+  const resNum = parseExponent(tokens);
+  if (resNum === undefined) {
+    return undefined;
+  }
+  if (
+    resNum === undefined ||
+    !(["NUMBER", "EXPONENT"] as NodeType[]).includes(resNum.node.type) ||
+    resNum.node.value === undefined
+  ) {
+    return resNum;
+  }
+  if (!(0 in resNum.tokens)) {
+    return resNum;
+  }
+  const resFunc = parseFunc(resNum.tokens);
+  if (
+    resFunc === undefined ||
+    !(["CONSTANT", "FUNCTION"] as NodeType[]).includes(resFunc.node.type) ||
+    resFunc.node.value === undefined
+  ) {
+    return resNum;
+  }
+  const value = factorOperators["*"](resNum.node.value, resFunc.node.value);
+  const resTokens = [...resNum.node.tokens, ...resFunc.node.tokens];
+  const resNode = new Node("NUMBER", value, value.toString(), resTokens, [
+    resNum.node,
+    resFunc.node,
+  ]);
+  return new ParseResult(resFunc.tokens, resNode);
+};
+
 const parseFactor = (tokens: Token[], node?: Node): ParseResult | undefined => {
   if (node === undefined) {
-    const res = parseExponent(tokens);
+    const res = parseCoefficient(tokens);
     if (res === undefined) {
       return undefined;
     }
@@ -280,7 +313,7 @@ const parseFactor = (tokens: Token[], node?: Node): ParseResult | undefined => {
   if (!(1 in tokens)) {
     throw new UnexpectedEndError();
   }
-  const res = parseExponent(tokens.slice(1));
+  const res = parseCoefficient(tokens.slice(1));
   if (res === undefined || res.node.value === undefined) {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
@@ -303,25 +336,6 @@ const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
   }
   if (!(0 in tokens)) {
     return new ParseResult(tokens, node);
-  }
-  if (
-    (["NUMBER", "EXPONENT"] as NodeType[]).includes(node.type) &&
-    node.value !== undefined
-  ) {
-    const res = parseFunc(tokens);
-    if (
-      res !== undefined &&
-      (["CONSTANT", "FUNCTION"] as NodeType[]).includes(res.node.type) &&
-      res.node.value !== undefined
-    ) {
-      const value = factorOperators["*"](node.value, res.node.value);
-      const resTokens = [...node.tokens, ...res.node.tokens];
-      const resNode = new Node("TERM", value, value.toString(), resTokens, [
-        node,
-        res.node,
-      ]);
-      return parseTerm(res.tokens, resNode);
-    }
   }
   if (tokens[0].type !== "FACTOR_OPERATOR") {
     return new ParseResult(tokens, node);
@@ -454,3 +468,7 @@ const echoSyntaxTree = (text: string) => {
 // console.log(echoSyntaxTree("date()"));
 // console.log(echoSyntaxTree("("));
 // console.log(echoSyntaxTree("log(10,"));
+// console.log(echoSyntaxTree("2seconds"));
+// console.log(echoSyntaxTree("(1+2)seconds"));
+// console.log(echoSyntaxTree("4pi^2"));
+// console.log(echoSyntaxTree("2^2pi"));
