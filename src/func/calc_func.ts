@@ -52,7 +52,7 @@ export const funcs: { [key in CalcFunctionKey]: CalcFunction } = Object.assign(
             .join(" ");
         },
       },
-      descripiton: ['search("s")', "sから始まる定数または関数名を返す"],
+      description: ['search("s")', "sから始まる定数または関数名を返す"],
     },
   },
   colorFuncs,
