@@ -17,10 +17,8 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
       },
     },
     description: [
-      "1. date()",
-      '現在の時間を"yyyy-MM-dd HH:mm:ss.SSS"形式で示す',
-      "2. date(t)",
-      'UNIX時間t[ミリ秒]から"yyyy-MM-dd HH:mm:ss.SSS"形式の時間に変換',
+      '1. date() 現在の時間を"yyyy-MM-dd HH:mm:ss.SSS"形式で示す',
+      '2. date(t) UNIX時間t[ミリ秒]から"yyyy-MM-dd HH:mm:ss.SSS"形式の時間に変換',
     ],
   },
   time: {
@@ -45,10 +43,8 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
       },
     },
     description: [
-      "1. time()",
-      "現在のUNIX時間[ミリ秒]",
-      "2. time(t)",
-      '"yyyyMMddHHmmssSSS"形式の時間tからUNIX時間[ミリ秒]に変換',
+      "1. time() 現在のUNIX時間[ミリ秒]",
+      '2. time(t) "yyyyMMddHHmmssSSS"形式の時間tからUNIX時間[ミリ秒]に変換',
       '"SSS"はなければ000とする',
       "日付要素の間に文字が入っていても変換可",
     ],

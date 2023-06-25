@@ -22,7 +22,7 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
         return String.fromCodePoint(Number(cp));
       },
     },
-    description: ["char(cp)", "コードポイントcpに対応する文字"],
+    description: ["char(cp) コードポイントcpに対応する文字"],
   },
   unicode: {
     funcs: {
@@ -35,7 +35,7 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
         return "U+" + cp.toString(16);
       },
     },
-    description: ['unicode("c")', "cのコードポイント"],
+    description: ['unicode("c") cのコードポイント'],
   },
   dash: {
     funcs: {
@@ -55,19 +55,19 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
           .join("");
       },
     },
-    description: ['dash("s")', "濁点をつける"],
+    description: ['dash("s") 濁点をつける'],
   },
   full2half: {
     funcs: {
       1: (s: any) => full2half(String(s)),
     },
-    description: ['full2half("s")', "全角カナを半角ｶﾅに変換"],
+    description: ['full2half("s") 全角カナを半角ｶﾅに変換'],
   },
   space: {
     funcs: {
       1: (s: any) => Array.from(String(s)).join("\u3000"),
     },
-    description: ['space("s")', "全角スペースを挿入"],
+    description: ['space("s") 全角スペースを挿入'],
   },
   sudden: {
     funcs: {
@@ -84,7 +84,7 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
     funcs: {
       1: (s: any) => Array.from(String(s)).length,
     },
-    description: ['length("s")', "sの文字数"],
+    description: ['length("s") sの文字数'],
   },
 };
 

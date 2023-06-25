@@ -37,12 +37,9 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
       },
     },
     description: [
-      "1. log()",
-      "常用対数",
-      "2. log(n)",
-      "nの常用対数",
-      "3. log(a, b)",
-      "bを底とするaの対数",
+      "1. log() 常用対数",
+      "2. log(n) nの常用対数",
+      "3. log(a, b) bを底とするaの対数",
     ],
   },
   rand: {
@@ -57,12 +54,9 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
       },
     },
     description: [
-      "1. rand()",
-      "0以上1未満のランダムな小数",
-      "2. rand(n)",
-      "1以上n以下のランダムな整数",
-      "3. rand(a, b)",
-      "a以上b未満のランダムな整数",
+      "1. rand() 0以上1未満のランダムな小数",
+      "2. rand(n) 1以上n以下のランダムな整数",
+      "3. rand(a, b) a以上b未満のランダムな整数",
     ],
   },
   fact: {
@@ -77,7 +71,7 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
           .reduce((a, b) => a * b);
       },
     },
-    description: ["fact(n)", "nの階乗"],
+    description: ["fact(n) nの階乗"],
   },
   sin: {
     funcs: {
@@ -85,7 +79,7 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         return Math.sin((n * Math.PI) / 180);
       },
     },
-    description: ["sin(θ)", "θ[°]での正弦"],
+    description: ["sin(θ) θ[°]での正弦"],
   },
   cos: {
     funcs: {
@@ -93,7 +87,7 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         return Math.cos((n * Math.PI) / 180);
       },
     },
-    description: ["cos(θ)", "θ[°]での余弦"],
+    description: ["cos(θ) θ[°]での余弦"],
   },
   tan: {
     funcs: {
@@ -101,19 +95,19 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         return Math.tan((n * Math.PI) / 180);
       },
     },
-    description: ["tan(θ)", "θ[°]での正接"],
+    description: ["tan(θ) θ[°]での正接"],
   },
   asin: {
     funcs: { 1: (n: any) => Math.asin(n) / (Math.PI / 180) },
-    description: ["asin(n)", "nでの逆正弦"],
+    description: ["asin(n) nでの逆正弦"],
   },
   acos: {
     funcs: { 1: (n: any) => Math.acos(n) / (Math.PI / 180) },
-    description: ["acos(n)", "nでの逆余弦"],
+    description: ["acos(n) nでの逆余弦"],
   },
   atan: {
     funcs: { 1: (n: any) => Math.atan(n) / (Math.PI / 180) },
-    description: ["atan(n)", "nでの逆正接"],
+    description: ["atan(n) nでの逆正接"],
   },
   gcd: {
     funcs: {
@@ -122,7 +116,7 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         return gcd(n, m);
       },
     },
-    description: ["gcd(a, b)", "aとbの最大公約数"],
+    description: ["gcd(a, b) aとbの最大公約数"],
   },
   lcm: {
     funcs: {
@@ -131,18 +125,18 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         return (n / gcd(n, m)) * m;
       },
     },
-    description: ["lcm(a, b)", "aとbの最小公倍数"],
+    description: ["lcm(a, b) aとbの最小公倍数"],
   },
   sqrt: {
     funcs: {
       1: (n: any) => Math.sqrt(n),
       2: (a: any, b: any) => a ** (1 / b),
     },
-    description: ["1. sqrt(n)", "nの平方根", "2. sqrt(a, b)", "aのb乗根"],
+    description: ["1. sqrt(n) nの平方根", "2. sqrt(a, b) aのb乗根"],
   },
   floor: {
     funcs: { 1: (n: any) => Math.floor(n) },
-    description: ["floor(n)", "n以下の最大の整数"],
+    description: ["floor(n) n以下の最大の整数"],
   },
   prime: {
     funcs: {
@@ -153,7 +147,7 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         return expressPrimeFactors(n);
       },
     },
-    description: ["prime(n)", "nの素因数分解"],
+    description: ["prime(n) nの素因数分解"],
   },
   cvtbase: {
     funcs: {
@@ -200,10 +194,7 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         return convertBase(dec, toBase);
       },
     },
-    description: [
-      'cvtbase("s", to, from)',
-      "文字列sをfrom進数からto進数に変換",
-    ],
+    description: ['cvtbase("s", to, from) 文字列sをfrom進数からto進数に変換'],
   },
   reduct: {
     funcs: {
@@ -215,7 +206,7 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         return `${x} : ${y}`;
       },
     },
-    description: ["reduct(a, b)", "aとbを約分"],
+    description: ["reduct(a, b) aとbを約分"],
   },
 };
 

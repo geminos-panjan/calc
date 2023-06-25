@@ -27,10 +27,8 @@ export const colorFuncs: { [key in ColorFuctionKey]: CalcFunction } = {
       },
     },
     description: [
-      "1. rgb2hsl(rgb)",
-      "rgbをhslに変換",
-      "2. rgb2hsl(r, g, b)",
-      "r, g, bをhslに変換",
+      "1. rgb2hsl(rgb) rgbをhslに変換",
+      "2. rgb2hsl(r, g, b) r, g, bをhslに変換",
     ],
   },
   hsl2rgb: {
@@ -45,10 +43,8 @@ export const colorFuncs: { [key in ColorFuctionKey]: CalcFunction } = {
       },
     },
     description: [
-      "1. hsl2rgb(hsl)",
-      "hslをrgbに変換",
-      "2. hsl2rgb(h, s, l)",
-      "h, s, lをrgbに変換",
+      "1. hsl2rgb(hsl) hslをrgbに変換",
+      "2. hsl2rgb(h, s, l) h, s, lをrgbに変換",
     ],
   },
 };
