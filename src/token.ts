@@ -1,7 +1,5 @@
 import { constants } from "./constant.js";
-import { numericFuncs } from "./func/numeric_func.js";
-import { stringFuncs } from "./func/string_func.js";
-import { reduceFuncs } from "./func/reduce_func.js";
+import { funcs } from "./func/calc_func.js";
 
 export type TokenType =
   | "ERROR"
@@ -53,7 +51,7 @@ const parsers: Parser[] = [
     type: "FLOAT",
   },
   { pattern: /^[\d_]+/, type: "INTEGER" },
-  { pattern: /^"(\\"|[^"])*"/, type: "STRING" },
+  { pattern: /^("(\\"|[^"])*"?|'(\\'|[^'])*'?)/, type: "STRING" },
   { pattern: /^[a-z]\w*/i, type: "IDENTIFIER" },
   { pattern: /^[\+\-]/, type: "TERM_OPERATOR" },
   { pattern: /^[\*\/%]/, type: "FACTOR_OPERATOR" },
@@ -100,7 +98,7 @@ export const createTokenList = (
       if (match in constants) {
         return "CONSTANT";
       }
-      if (match in Object.assign({}, numericFuncs, reduceFuncs, stringFuncs)) {
+      if (match in funcs) {
         return "FUNCTION";
       }
       return "ERROR";
@@ -156,3 +154,6 @@ const echoTokenList = (s: string) => {
 // console.log(echoTokenList("1e-3"));
 // console.log(echoTokenList("2 * 3"));
 // console.log(echoTokenList("1+2*(3/(1+2))"));
+// console.log(echoTokenList('"1+2*(3/(1+2))'));
+// console.log(echoTokenList("'1+2*(3/(1+2))"));
+// console.log(echoTokenList("log('hoge', 2"));

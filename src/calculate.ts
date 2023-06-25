@@ -40,8 +40,8 @@ export const calculate = (
   }
   const tokens = createTokenList(text.replace("ans", ans));
   const node = createSyntaxTree(tokens);
-  if (node.value === undefined) {
-    return `"${node.text}"`;
+  if (typeof node.value === "string") {
+    return `"${node.value}"`;
   }
   const value = roundFloat(node.value);
   if (format !== undefined) {

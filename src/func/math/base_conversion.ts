@@ -1,17 +1,19 @@
 const CHARS =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
+const NUMS = Array.from(CHARS).reduce<{ [key: string]: number }>((p, c, i) => {
+  p[c] = i;
+  return p;
+}, {});
 
 export const decimal = (nonDecimal: string, base: number) => {
-  const nums: { [key: string]: number } = {};
-  Array.from(CHARS).forEach((c, i) => (nums[c] = i));
   return Array.from(nonDecimal).reduce((p, c, i) => {
     if (isNaN(p)) {
       return NaN;
     }
-    if (!(c in nums)) {
+    if (!(c in NUMS)) {
       return NaN;
     }
-    return p + nums[c] * base ** (nonDecimal.length - 1 - i);
+    return p + NUMS[c] * base ** (nonDecimal.length - 1 - i);
   }, 0);
 };
 
