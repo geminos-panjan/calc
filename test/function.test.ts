@@ -4,6 +4,11 @@ const echoCalculation = (text: string) => {
   return `${text} = ${calculate(text)}`;
 };
 
+// console.log(echoCalculation("1+2"));
+// console.log(echoCalculation("2-1"));
+// console.log(echoCalculation("2*3"));
+// console.log(echoCalculation("2/3"));
+// console.log(echoCalculation("2^5"));
 // console.log(echoCalculation('help("rgb2hsl")'));
 // console.log(echoCalculation('search("a")'));
 // console.log(echoCalculation("rgb2hsl(0xaabbcc)"));

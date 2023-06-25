@@ -253,7 +253,7 @@ const parseFactor = (tokens: Token[], node?: Node): ParseResult | undefined => {
     throw new UnexpectedEndError();
   }
   const res = parseCoefficient(tokens.slice(1));
-  if (res === undefined || typeof res.node.value === "number") {
+  if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
   const value = exponentOperator[tokens[0].word](node.value, res.node.value);
@@ -276,14 +276,14 @@ const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
   if (tokens[0].type !== "FACTOR_OPERATOR") {
     return new ParseResult(tokens, node);
   }
-  if (typeof node.value === "number") {
+  if (typeof node.value !== "number") {
     throw new UnexpectedTokenError(`${tokens[0].word}`);
   }
   if (!(1 in tokens)) {
     throw new UnexpectedEndError();
   }
   const res = parseFactor(tokens.slice(1));
-  if (res === undefined || typeof res.node.value === "number") {
+  if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`${tokens[1].word}`);
   }
   if (["/", "%"].includes(tokens[0].word) && res.node.value === 0) {
@@ -309,14 +309,14 @@ const parseExpression = (
   if (!(0 in tokens) || tokens[0].type !== "TERM_OPERATOR") {
     return new ParseResult(tokens, node);
   }
-  if (typeof node.value === "number") {
+  if (typeof node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[0].word}"`);
   }
   if (!(1 in tokens)) {
     throw new UnexpectedEndError();
   }
   const res = parseTerm(tokens.slice(1));
-  if (res === undefined || typeof res.node.value === "number") {
+  if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
   const value = termOperators[tokens[0].word](node.value, res.node.value);
