@@ -47,11 +47,16 @@ export const calculate = (
   if (format !== undefined) {
     return formatsTypes[format](value);
   }
-  const token = tokens.find((t) =>
-    (["BINARY", "HEX", "EXPONENT"] as TokenType[]).includes(t.type)
+  const nums = tokens.filter((t) =>
+    (["BINARY", "EXPONENT", "FLOAT", "HEX", "INTEGER"] as TokenType[]).includes(
+      t.type
+    )
   );
-  if (token !== undefined) {
-    return formatsTypes[token.type as FormatType](value);
+  if (
+    0 in nums &&
+    (["BINARY", "HEX"] as FormatType[]).includes(nums[0].type as FormatType)
+  ) {
+    return formatsTypes[nums[0].type as FormatType](value);
   }
   return value.toString();
 };
