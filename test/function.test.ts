@@ -1,9 +1,18 @@
 import { calculate } from "../src/calculate.js";
+import { constants } from "../src/constant.js";
+import { funcs } from "../src/func/calc_func.js";
 
 const echoCalculation = (text: string) => {
   return `${text} = ${calculate(text)}`;
 };
 
+const echoIdentifier = () => {
+  return Object.keys(Object.assign({}, constants, funcs))
+    .sort((a, b) => a.localeCompare(b))
+    .join("\n");
+};
+
+// console.log(echoIdentifier());
 // console.log(echoCalculation("1+2"));
 // console.log(echoCalculation("2-1"));
 // console.log(echoCalculation("2*3"));
