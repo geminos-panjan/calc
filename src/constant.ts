@@ -12,6 +12,7 @@ export type ConstantKey =
   | "yard"
   | "mile"
   | "kt"
+  | "p"
   | "n"
   | "u"
   | "m"
@@ -66,6 +67,10 @@ export const constants: { [key in ConstantKey]: Constant } = {
   kt: {
     value: 1.852,
     description: ["1ノット = 1.852km/h"],
+  },
+  p: {
+    value: 1e-12,
+    description: ["ピコ, 1e-12"],
   },
   n: {
     value: 1e-9,
