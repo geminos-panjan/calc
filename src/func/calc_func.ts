@@ -47,7 +47,9 @@ export const funcs: { [key in CalcFunctionKey]: CalcFunction } = Object.assign(
           }
           const ids = Object.keys(Object.assign({}, constants, funcs));
           return ids
-            .filter((v) => v.startsWith(s))
+            .filter((v) =>
+              v.toLocaleLowerCase().startsWith(s.toLocaleLowerCase())
+            )
             .sort((a, b) => a.localeCompare(b))
             .join(" ");
         },
