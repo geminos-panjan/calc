@@ -64,6 +64,8 @@ const echoIdentifier = () => {
 // console.log(echoCalculation("cvtbase(123, '16', 10)"));
 // console.log(echoCalculation("reduct(12, 16)"));
 // console.log(echoCalculation("reduct('hoge', 16)"));
+// console.log(echoCalculation("permut(5, 2)"));
+// console.log(echoCalculation("combin(5, 2)"));
 // console.log(echoCalculation("sum(1, 2, 3)"));
 // console.log(echoCalculation('sum("hoge", 2, 3)'));
 // console.log(echoCalculation("ave(1, 2, 3)"));

@@ -20,7 +20,9 @@ export type MathFunctionKey =
   | "floor"
   | "prime"
   | "cvtbase"
-  | "reduct";
+  | "reduct"
+  | "permut"
+  | "combin";
 
 export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
   log: {
@@ -65,7 +67,10 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
         if (n < 0 || isNaN(Number(n))) {
           throw new InvalidArgsError("fact(n), n >= 0");
         }
-        return new Array(Math.floor(n))
+        if (!Number.isInteger(n)) {
+          throw new InvalidArgsError(`fact(n), "${n}" is not an integer`);
+        }
+        return new Array(n)
           .fill(0)
           .map((_, i) => i + 1)
           .reduce((a, b) => a * b);
@@ -207,6 +212,49 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
       },
     },
     description: ["reduct(a, b) aとbを約分"],
+  },
+  permut: {
+    funcs: {
+      2: (a: any, b: any) => {
+        const [n, m] = mapNumList([a, b]);
+        if (n < 1 || m < 1 || n < m) {
+          throw new InvalidArgsError("permut(a, b), a > 0, b > 0, a >= b");
+        }
+        if (!Number.isInteger(n) || !Number.isInteger(m)) {
+          throw new InvalidArgsError(
+            "permut(a, b), a and b must be an integer"
+          );
+        }
+        return Array(m - 1)
+          .fill(0)
+          .reduce((p, _, i) => p * (n - i), 1);
+      },
+    },
+    description: ["permut(a, b) a個からb個選ぶ順列の総数"],
+  },
+  combin: {
+    funcs: {
+      2: (a: any, b: any) => {
+        const [n, m] = mapNumList([a, b]);
+        if (n < 1 || m < 1 || n < m) {
+          throw new InvalidArgsError("combin(a, b), a > 0, b > 0, a >= b");
+        }
+        if (!Number.isInteger(n) || !Number.isInteger(m)) {
+          throw new InvalidArgsError(
+            "combin(a, b), a and b must be an integer"
+          );
+        }
+        return (
+          Array(m)
+            .fill(0)
+            .reduce((p, _, i) => p * (n - i), 1) /
+          Array(m)
+            .fill(0)
+            .reduce((p, _, i) => p * (m - i), 1)
+        );
+      },
+    },
+    description: ["combin(a, b) a個からb個選ぶ組合せの総数"],
   },
 };
 
