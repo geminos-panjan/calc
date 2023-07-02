@@ -225,7 +225,7 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
             "permut(a, b), a and b must be an integer"
           );
         }
-        return Array(m - 1)
+        return Array(m)
           .fill(0)
           .reduce((p, _, i) => p * (n - i), 1);
       },
