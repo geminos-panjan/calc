@@ -6,6 +6,7 @@ import {
   ZeroDivisionError,
 } from "./error.js";
 import {
+  bitwiseOperator,
   exponentOperator,
   factorOperators,
   signOperators,
@@ -21,6 +22,9 @@ import {
 
 type NodeType =
   | "EXPRESSION"
+  | "BITWISE_OR"
+  | "BITWISE_XOR"
+  | "BITWISE_AND"
   | "TERM"
   | "FACTOR"
   | "COEFFICIENT"
@@ -256,7 +260,7 @@ const parseFactor = (tokens: Token[], node?: Node): ParseResult | undefined => {
   if (!(1 in tokens)) {
     throw new UnexpectedEndError();
   }
-  const res = parseCoefficient(tokens.slice(1));
+  const res = parseFactor(tokens.slice(1));
   if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
@@ -301,7 +305,7 @@ const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
   return parseTerm(res.tokens, resNode);
 };
 
-const parseExpression = (
+const parseBitwiseAnd = (
   tokens: Token[],
   node?: Node
 ): ParseResult | undefined => {
@@ -310,7 +314,7 @@ const parseExpression = (
     if (res === undefined) {
       return undefined;
     }
-    return parseExpression(res.tokens, res.node);
+    return parseBitwiseAnd(res.tokens, res.node);
   }
   if (!(0 in tokens) || tokens[0].type !== "TERM_OPERATOR") {
     return new ParseResult(tokens, node);
@@ -326,6 +330,102 @@ const parseExpression = (
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
   const value = termOperators[tokens[0].word](node.value, res.node.value);
+  const resTokens = node.tokens.concat(
+    tokens.slice(0, res.node.tokens.length + 1)
+  );
+  const resNode = new Node("BITWISE_AND", value, resTokens, [node, res.node]);
+  return parseBitwiseAnd(res.tokens, resNode);
+};
+
+const parseBitwiseXor = (
+  tokens: Token[],
+  node?: Node
+): ParseResult | undefined => {
+  if (node === undefined) {
+    const res = parseBitwiseAnd(tokens);
+    if (res === undefined) {
+      return undefined;
+    }
+    return parseBitwiseXor(res.tokens, res.node);
+  }
+  if (!(0 in tokens) || tokens[0].word !== "&") {
+    return new ParseResult(tokens, node);
+  }
+  if (typeof node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[0].word}"`);
+  }
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseBitwiseAnd(tokens.slice(1));
+  if (res === undefined || typeof res.node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+  }
+  const value = bitwiseOperator["&"](node.value, res.node.value);
+  const resTokens = node.tokens.concat(
+    tokens.slice(0, res.node.tokens.length + 1)
+  );
+  const resNode = new Node("BITWISE_XOR", value, resTokens, [node, res.node]);
+  return parseBitwiseXor(res.tokens, resNode);
+};
+
+const parseBitwiseOr = (
+  tokens: Token[],
+  node?: Node
+): ParseResult | undefined => {
+  if (node === undefined) {
+    const res = parseBitwiseXor(tokens);
+    if (res === undefined) {
+      return undefined;
+    }
+    return parseBitwiseOr(res.tokens, res.node);
+  }
+  if (!(0 in tokens) || tokens[0].word !== "^") {
+    return new ParseResult(tokens, node);
+  }
+  if (typeof node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[0].word}"`);
+  }
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseBitwiseXor(tokens.slice(1));
+  if (res === undefined || typeof res.node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+  }
+  const value = bitwiseOperator["^"](node.value, res.node.value);
+  const resTokens = node.tokens.concat(
+    tokens.slice(0, res.node.tokens.length + 1)
+  );
+  const resNode = new Node("BITWISE_OR", value, resTokens, [node, res.node]);
+  return parseBitwiseOr(res.tokens, resNode);
+};
+
+const parseExpression = (
+  tokens: Token[],
+  node?: Node
+): ParseResult | undefined => {
+  if (node === undefined) {
+    const res = parseBitwiseOr(tokens);
+    if (res === undefined) {
+      return undefined;
+    }
+    return parseExpression(res.tokens, res.node);
+  }
+  if (!(0 in tokens) || tokens[0].word !== "|") {
+    return new ParseResult(tokens, node);
+  }
+  if (typeof node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[0].word}"`);
+  }
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseBitwiseOr(tokens.slice(1));
+  if (res === undefined || typeof res.node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+  }
+  const value = bitwiseOperator["|"](node.value, res.node.value);
   const resTokens = node.tokens.concat(
     tokens.slice(0, res.node.tokens.length + 1)
   );

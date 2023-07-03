@@ -18,8 +18,13 @@ const echoIdentifier = () => {
 // console.log(echoCalculation("2*3"));
 // console.log(echoCalculation("2/3"));
 // console.log(echoCalculation("2/(2^2-4)"));
+// console.log(echoCalculation("2**3**2"));
+// console.log(echoCalculation("2**(3**2)"));
+// console.log(echoCalculation("(2**3)**2"));
 // console.log(echoCalculation("2^5"));
 // console.log(echoCalculation("1+2)*3"));
+// console.log(0b1101 | (0b1011 ^ (0b0011 & 0b1101)));
+// console.log(echoCalculation("0b1101|0b1011^0b0011&0b1101"));
 // console.log(echoCalculation('help("rgb2hsl")'));
 // console.log(echoCalculation('search("a")'));
 // console.log(echoCalculation('search("a'));

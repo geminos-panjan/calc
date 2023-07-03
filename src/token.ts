@@ -20,7 +20,8 @@ export type TokenType =
   | "CLOSE_PAREN"
   | "OPEN_BLACKET"
   | "CLOSE_BLACKET"
-  | "COMMA";
+  | "COMMA"
+  | "BITWISE_OPERATOR";
 export class Token {
   type;
   word;
@@ -53,14 +54,15 @@ const parsers: Parser[] = [
   { pattern: /^[\d_]+/, type: "INTEGER" },
   { pattern: /^("(\\"|[^"])*"?|'(\\'|[^'])*'?)/, type: "STRING" },
   { pattern: /^[a-z]\w*/i, type: "IDENTIFIER" },
-  { pattern: /^[\+\-]/, type: "TERM_OPERATOR" },
+  { pattern: /^[\+\-~]/, type: "TERM_OPERATOR" },
+  { pattern: /^\*\*/, type: "EXPONENT_OPERATOR" },
   { pattern: /^[\*\/%]/, type: "FACTOR_OPERATOR" },
-  { pattern: /^\^/, type: "EXPONENT_OPERATOR" },
   { pattern: /^\(/, type: "OPEN_PAREN" },
   { pattern: /^\)/, type: "CLOSE_PAREN" },
   { pattern: /^\[/, type: "OPEN_BLACKET" },
   { pattern: /^\]/, type: "CLOSE_BLACKET" },
   { pattern: /^\,/, type: "COMMA" },
+  { pattern: /^[&\|\^]/, type: "BITWISE_OPERATOR" },
 ];
 
 export const createTokenList = (
@@ -145,3 +147,5 @@ const echoTokenList = (s: string) => {
 // console.log(echoTokenList('"1+2*(3/(1+2))'));
 // console.log(echoTokenList("'1+2*(3/(1+2))"));
 // console.log(echoTokenList("log('hoge', 2"));
+// console.log(echoTokenList("~0xff"));
+// console.log(echoTokenList("2**3**2"));
