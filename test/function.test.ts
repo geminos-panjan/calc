@@ -1,9 +1,9 @@
-import { calculate } from "../src/calculate.js";
+import { FormatType, calculate } from "../src/calculate.js";
 import { constants } from "../src/constant.js";
 import { funcs } from "../src/func/calc_func.js";
 
-const echoCalculation = (text: string) => {
-  return `${text} = ${calculate(text)}`;
+const echoCalculation = (text: string, format: FormatType = "DECIMAL") => {
+  return `${text} = ${calculate(text, format)}`;
 };
 
 const echoIdentifier = () => {
@@ -69,6 +69,7 @@ const echoIdentifier = () => {
 // console.log(echoCalculation("cvtbase(123, '16', 10)"));
 // console.log(echoCalculation("reduct(12, 16)"));
 // console.log(echoCalculation("reduct('hoge', 16)"));
+// console.log(echoCalculation("reduct(0.1*100, 10)"));
 // console.log(echoCalculation("permut(5, 2)"));
 // console.log(echoCalculation("combin(5, 2)"));
 // console.log(echoCalculation("sum(1, 2, 3)"));
@@ -85,3 +86,14 @@ const echoIdentifier = () => {
 // console.log(echoCalculation('space("ドンキーコング")'));
 // console.log(echoCalculation('sudden("突然の死")'));
 // console.log(echoCalculation('length("hoge")'));
+// console.log(echoCalculation("1e-13", "SI"));
+// console.log(echoCalculation("p", "SI"));
+// console.log(echoCalculation("n", "SI"));
+// console.log(echoCalculation("u", "SI"));
+// console.log(echoCalculation("m", "SI"));
+// console.log(echoCalculation("1", "SI"));
+// console.log(echoCalculation("k", "SI"));
+// console.log(echoCalculation("M", "SI"));
+// console.log(echoCalculation("G", "SI"));
+// console.log(echoCalculation("T", "SI"));
+// console.log(echoCalculation("1e+13", "SI"));

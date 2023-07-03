@@ -1,7 +1,8 @@
+import { constants } from "./constant.js";
 import { createSyntaxTree } from "./syntax_tree.js";
 import { TokenType, createTokenList } from "./token.js";
 
-export type FormatType = "DECIMAL" | "BINARY" | "HEX" | "EXPONENT";
+export type FormatType = "DECIMAL" | "BINARY" | "HEX" | "EXPONENT" | "SI";
 
 export const formatsTypes: { [key in FormatType]: (n: number) => string } = {
   DECIMAL: (n) => n.toString(10),
@@ -14,6 +15,36 @@ export const formatsTypes: { [key in FormatType]: (n: number) => string } = {
     return "0x" + hex.padStart(Math.ceil(hex.length / 2) * 2, "0");
   },
   EXPONENT: (n) => n.toExponential(),
+  SI: (n) => {
+    if (n < constants.n.value) {
+      return (n / constants.p.value).toString() + "p";
+    }
+    if (n < constants.u.value) {
+      return (n / constants.n.value).toString() + "n";
+    }
+    if (n < constants.m.value) {
+      return (n / constants.u.value).toString() + "u";
+    }
+    if (n < 1) {
+      return (n / constants.m.value).toString() + "m";
+    }
+    if (n < constants.k.value) {
+      return n.toString();
+    }
+    if (n < constants.M.value) {
+      return (n / constants.k.value).toString() + "k";
+    }
+    if (n < constants.M.value) {
+      return (n / constants.k.value).toString() + "k";
+    }
+    if (n < constants.G.value) {
+      return (n / constants.M.value).toString() + "M";
+    }
+    if (n < constants.T.value) {
+      return (n / constants.G.value).toString() + "G";
+    }
+    return (n / constants.T.value).toString() + "T";
+  },
 };
 
 const roundFloat = (n: number) => {
