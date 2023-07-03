@@ -97,3 +97,4 @@ const echoIdentifier = () => {
 // console.log(echoCalculation("G", "SI"));
 // console.log(echoCalculation("T", "SI"));
 // console.log(echoCalculation("1e+13", "SI"));
+// console.log(echoCalculation("-1000", "SI"));

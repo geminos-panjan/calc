@@ -16,31 +16,38 @@ export const formatsTypes: { [key in FormatType]: (n: number) => string } = {
   },
   EXPONENT: (n) => n.toExponential(),
   SI: (n) => {
-    if (n < constants.n.value) {
-      return (n / constants.p.value).toString() + "p";
+    if (n === 0) {
+      return "0";
     }
-    if (n < constants.u.value) {
-      return (n / constants.n.value).toString() + "n";
+    const abs = Math.abs(n);
+    if (abs < constants.p.value * 1e-3) {
+      return n.toExponential();
     }
-    if (n < constants.m.value) {
-      return (n / constants.u.value).toString() + "u";
+    if (abs < constants.n.value) {
+      return roundFloat(n / constants.p.value).toString() + "p";
     }
-    if (n < 1) {
-      return (n / constants.m.value).toString() + "m";
+    if (abs < constants.u.value) {
+      return roundFloat(n / constants.n.value).toString() + "n";
     }
-    if (n < constants.k.value) {
+    if (abs < constants.m.value) {
+      return roundFloat(n / constants.u.value).toString() + "u";
+    }
+    if (abs < 1) {
+      return roundFloat(n / constants.m.value).toString() + "m";
+    }
+    if (abs < constants.k.value) {
       return n.toString();
     }
-    if (n < constants.M.value) {
+    if (abs < constants.M.value) {
       return (n / constants.k.value).toString() + "k";
     }
-    if (n < constants.M.value) {
+    if (abs < constants.M.value) {
       return (n / constants.k.value).toString() + "k";
     }
-    if (n < constants.G.value) {
+    if (abs < constants.G.value) {
       return (n / constants.M.value).toString() + "M";
     }
-    if (n < constants.T.value) {
+    if (abs < constants.T.value) {
       return (n / constants.G.value).toString() + "G";
     }
     return (n / constants.T.value).toString() + "T";
