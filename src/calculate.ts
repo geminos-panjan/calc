@@ -73,10 +73,11 @@ export const calculate = (
   format?: FormatType,
   ans: string = ""
 ) => {
-  if (text === "") {
+  const replaced = text.replace(/ans/g, ans);
+  if (replaced === "") {
     return "";
   }
-  const tokens = createTokenList(text.replace("ans", ans));
+  const tokens = createTokenList(replaced);
   const node = createSyntaxTree(tokens);
   if (typeof node.value === "string") {
     return node.value;
