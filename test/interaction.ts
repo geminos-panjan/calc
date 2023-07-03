@@ -7,13 +7,15 @@ const interaction = () => {
   console.log("Input Formula...");
   console.log();
   const rl = createInterface({ input, output });
+  let ans = "";
   const question = (answer: string) => {
     if (answer === "quit" || answer === "exit") {
       rl.close();
       return;
     }
     try {
-      const result = calculate(answer);
+      const result = calculate(answer, undefined, ans);
+      ans = result;
       console.log(result);
     } catch (ex) {
       if (ex instanceof Error) {
