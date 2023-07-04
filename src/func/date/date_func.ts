@@ -26,14 +26,14 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
       0: () => Date.now(),
       1: (s: any) => {
         const regex =
-          /(\d{4})[^\d]*(\d{2})[^\d]*(\d{2})[^\d]*(\d{2})[^\d]*(\d{2})[^\d]*(\d{2})[^\d]*(\d{3})?/;
+          /(\d{4})[^\d]*(\d{2})?[^\d]*(\d{2})?[^\d]*(\d{2})?[^\d]*(\d{2})?[^\d]*(\d{2})?[^\d]*(\d{3})?/;
         const m = regex.exec(String(s));
         if (m === null) {
           throw new InvalidArgsError(`"${s}"`);
         }
         const yyyy = Number(m[1] ?? 0);
         const MM = Number(m[2] ?? 1) - 1;
-        const dd = Number(m[3] ?? 0);
+        const dd = Number(m[3] ?? 1);
         const HH = Number(m[4] ?? 0);
         const mm = Number(m[5] ?? 0);
         const ss = Number(m[6] ?? 0);
@@ -45,8 +45,8 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
     description: [
       "1. time() 現在のUNIX時間[ミリ秒]",
       '2. time(t) "yyyyMMddHHmmssSSS"形式の時間tからUNIX時間[ミリ秒]に変換',
-      '"SSS"はなければ000とする',
-      "日付要素の間に文字が入っていても変換可",
+      '"2038年01月19日03時14分07秒"のように間に文字が入っていても可',
+      "ただし0埋めは必要",
     ],
   },
 };
