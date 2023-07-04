@@ -53,8 +53,17 @@ const echoFuncs = () => {
 // console.log(echoCalculation("rgb2hsl(0xaabbcc)"));
 // console.log(echoCalculation("rgb2hsl('hoge')"));
 // console.log(echoCalculation("rgb2hsl(170, 187, 204)"));
+// console.log(echoCalculation("rgb2hsl(1700, 1870, 2040)"));
+// console.log(echoCalculation("rgb2hsl(-100, -100, -100)"));
 // console.log(echoCalculation("rgb2hsl('hoge', 187, 204)"));
 // console.log(echoCalculation("hsl2rgb(210, 25, 73.3)"));
+// console.log(echoCalculation("hsl2rgb(60, 100, 50)"));
+// console.log(echoCalculation("hsl2rgb(120, 100, 50)"));
+// console.log(echoCalculation("hsl2rgb(180, 100, 50)"));
+// console.log(echoCalculation("hsl2rgb(240, 100, 50)"));
+// console.log(echoCalculation("hsl2rgb(300, 100, 50)"));
+// console.log(echoCalculation("hsl2rgb(360, 100, 50)"));
+// console.log(echoCalculation("hsl2rgb(-10, -100, -100)"));
 // console.log(echoCalculation("hsl2rgb('hoge', 25, 73.3)"));
 // console.log(echoCalculation("date()"));
 // console.log(echoCalculation("date(time())"));

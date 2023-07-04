@@ -90,7 +90,7 @@ const green = (h: number, s: number, l: number) => {
 const blue = (h: number, s: number, l: number) => {
   const max = hslMax(s, l);
   const min = hslMin(s, l);
-  if (h <= 60) {
+  if (h <= 120) {
     return min;
   }
   if (h <= 180) {
@@ -102,17 +102,32 @@ const blue = (h: number, s: number, l: number) => {
   return ((360 - h) / 60) * (max - min) + min;
 };
 
+const minmax = (min: number, x: number, max: number) => {
+  if (x < min) {
+    return min;
+  }
+  if (max < x) {
+    return max;
+  }
+  return x;
+};
+
 export const rgb2hsl = (r: number, g: number, b: number) => {
-  const h = hue(r, g, b);
-  const s = saturation(r, g, b);
-  const l = light(r, g, b);
+  const rx = minmax(0, r, 255);
+  const gx = minmax(0, g, 255);
+  const bx = minmax(0, b, 255);
+  const h = hue(rx, gx, bx);
+  const s = saturation(rx, gx, bx);
+  const l = light(rx, gx, bx);
   return { h, s, l };
 };
 
 export const hsl2rgb = (h: number, s: number, l: number) => {
-  const r = red(h, s, l);
-  const g = green(h, s, l);
-  const b = blue(h, s, l);
+  const sx = minmax(0, s, 100);
+  const lx = minmax(0, l, 100);
+  const r = red(h % 360, sx, lx);
+  const g = green(h % 360, sx, lx);
+  const b = blue(h % 360, sx, lx);
   return { r, g, b };
 };
 

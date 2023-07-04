@@ -36,15 +36,12 @@ export const colorFuncs: { [key in ColorFuctionKey]: CalcFunction } = {
       3: (h: any, l: any, s: any) => {
         const [nh, nl, ns] = mapNumList([h, l, s]);
         const rgb = hsl2rgb(nh, nl, ns);
-        const r = Math.floor(rgb.r).toString(16);
-        const g = Math.floor(rgb.g).toString(16);
-        const b = Math.floor(rgb.b).toString(16);
+        const r = Math.round(rgb.r).toString(16).padStart(2, "0");
+        const g = Math.round(rgb.g).toString(16).padStart(2, "0");
+        const b = Math.round(rgb.b).toString(16).padStart(2, "0");
         return "#" + r + g + b;
       },
     },
-    description: [
-      "1. hsl2rgb(hsl) hslをrgbに変換",
-      "2. hsl2rgb(h, s, l) h, s, lをrgbに変換",
-    ],
+    description: ["hsl2rgb(h, s, l) h, s, lをrgbに変換"],
   },
 };
