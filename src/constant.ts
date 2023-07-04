@@ -71,59 +71,59 @@ export const constants: { [key in ConstantKey]: Constant } = {
   },
   p: {
     value: 1e-12,
-    description: ["ピコ, 1e-12"],
+    description: ["1ピコ = 1e-12"],
   },
   n: {
     value: 1e-9,
-    description: ["ナノ, 1e-9"],
+    description: ["1ナノ = 1e-9"],
   },
   u: {
     value: 1e-6,
-    description: ["マイクロ, 1e-6"],
+    description: ["1マイクロ = 1e-6"],
   },
   m: {
     value: 1e-3,
-    description: ["ミリ, 1e-3"],
+    description: ["1ミリ = 1e-3"],
   },
   k: {
     value: 1e3,
-    description: ["キロ, 1e3"],
+    description: ["1キロ = 1e3"],
   },
   M: {
     value: 1e6,
-    description: ["メガ, 1e6"],
+    description: ["1メガ = 1e6"],
   },
   G: {
     value: 1e9,
-    description: ["ギガ, 1e9"],
+    description: ["1ギガ = 1e9"],
   },
   T: {
     value: 1e12,
-    description: ["テラ, 1e12"],
+    description: ["1テラ = 1e12"],
   },
   Ki: {
     value: 2 ** 10,
-    description: ["キビ, 2 ^ 10"],
+    description: ["1キビ = 2 ** 10"],
   },
   Mi: {
     value: 2 ** 20,
-    description: ["メビ, 2 ^ 20"],
+    description: ["1メビ, 2 ** 20"],
   },
   Gi: {
     value: 2 ** 30,
-    description: ["ギビ, 2 ^ 30"],
+    description: ["1ギビ = 2 ** 30"],
   },
   Ti: {
     value: 2 ** 40,
-    description: ["テビ, 2 ^ 40"],
+    description: ["1テビ = 2 ** 40"],
   },
   c: {
     value: 299_792_458,
-    description: ["光速, 299 752 458m/s"],
+    description: ["光速 299 752 458m/s"],
   },
   g: {
     value: 9.806_65,
-    description: ["重力加速度, 9.806 65m/s^2"],
+    description: ["重力加速度 9.806 65m/s^2"],
   },
   seconds: {
     value: 1e3,

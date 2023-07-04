@@ -1,5 +1,5 @@
 import { FormatType, calculate } from "../src/calculate.js";
-import { constants } from "../src/constant.js";
+import { ConstantKey, constants } from "../src/constant.js";
 import { funcs } from "../src/func/calc_func.js";
 
 const echoCalculation = (text: string, format: FormatType = "DECIMAL") => {
@@ -12,7 +12,17 @@ const echoIdentifier = () => {
     .join("\n");
 };
 
+const echoConstants = () => {
+  return Object.keys(constants)
+    .map((key) => {
+      const c = constants[key as ConstantKey];
+      return `${key},${c.value},${c.description.join(" ")}`;
+    })
+    .join("\n");
+};
+
 // console.log(echoIdentifier());
+// console.log(echoConstants());
 // console.log(echoCalculation("1+2"));
 // console.log(echoCalculation("2-1"));
 // console.log(echoCalculation("2*3"));
@@ -23,8 +33,8 @@ const echoIdentifier = () => {
 // console.log(echoCalculation("(2**3)**2"));
 // console.log(echoCalculation("2^5"));
 // console.log(echoCalculation("1+2)*3"));
-console.log(echoCalculation("~0b0101"));
-console.log(echoCalculation("~0b0101~0b1010"));
+// console.log(echoCalculation("~0b0101"));
+// console.log(echoCalculation("~0b0101~0b1010"));
 // console.log(0b1101 | (0b1011 ^ (0b0011 & 0b1101)));
 // console.log(echoCalculation("0b1101|0b1011^0b0011&0b1101"));
 // console.log(echoCalculation('help("rgb2hsl")'));
