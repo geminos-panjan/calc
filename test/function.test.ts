@@ -95,6 +95,7 @@ const echoFuncs = () => {
 // console.log(echoCalculation("sqrt(64, 3)"));
 // console.log(echoCalculation("floor(0.1)"));
 // console.log(echoCalculation("prime(123)"));
+// console.log(echoCalculation("prime(15646464)"));
 // console.log(echoCalculation('cvtbase("Bx", 64, 10)'));
 // console.log(echoCalculation("cvtbase(123, 16, '10')"));
 // console.log(echoCalculation("cvtbase(123, '16', 10)"));

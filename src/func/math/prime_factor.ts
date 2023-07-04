@@ -55,7 +55,7 @@ export const expressPrimeFactors = (num: number) => {
     return String(num);
   }
   return keys
-    .map((k) => String(k) + (primes[k] > 1 ? ` ^ ${primes[k]}` : ""))
+    .map((k) => String(k) + (primes[k] > 1 ? ` ** ${primes[k]}` : ""))
     .join(" * ");
 };
 
