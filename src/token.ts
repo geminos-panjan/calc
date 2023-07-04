@@ -21,6 +21,7 @@ export type TokenType =
   | "OPEN_BLACKET"
   | "CLOSE_BLACKET"
   | "COMMA"
+  | "BITWISE_NOT_OPERATOR"
   | "BITWISE_OPERATOR";
 export class Token {
   type;
@@ -54,7 +55,7 @@ const parsers: Parser[] = [
   { pattern: /^[\d_]+/, type: "INTEGER" },
   { pattern: /^("(\\"|[^"])*"?|'(\\'|[^'])*'?)/, type: "STRING" },
   { pattern: /^[a-z]\w*/i, type: "IDENTIFIER" },
-  { pattern: /^[\+\-~]/, type: "TERM_OPERATOR" },
+  { pattern: /^[\+\-]/, type: "TERM_OPERATOR" },
   { pattern: /^\*\*/, type: "EXPONENT_OPERATOR" },
   { pattern: /^[\*\/%]/, type: "FACTOR_OPERATOR" },
   { pattern: /^\(/, type: "OPEN_PAREN" },
@@ -63,6 +64,7 @@ const parsers: Parser[] = [
   { pattern: /^\]/, type: "CLOSE_BLACKET" },
   { pattern: /^\,/, type: "COMMA" },
   { pattern: /^[&\|\^]/, type: "BITWISE_OPERATOR" },
+  { pattern: /^~/, type: "BITWISE_NOT_OPERATOR" },
 ];
 
 export const createTokenList = (

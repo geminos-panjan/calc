@@ -22,6 +22,11 @@ export const exponentOperator: {
 export const signOperators: { [key: string]: (n: number) => number } = {
   "+": (n) => n,
   "-": (n) => -n,
+};
+
+export const bitwiseNotOperator: {
+  [key: string]: (n: number) => number;
+} = {
   "~": (n) => ~n >>> 0,
 };
 

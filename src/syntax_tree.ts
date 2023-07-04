@@ -6,6 +6,7 @@ import {
   ZeroDivisionError,
 } from "./error.js";
 import {
+  bitwiseNotOperator,
   bitwiseOperator,
   exponentOperator,
   factorOperators,
@@ -190,6 +191,19 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
       throw new UnexpectedTokenError(`"${tokens[1].word}"`);
     }
     const value = signOperators[tokens[0].word](res.node.value);
+    const resTokens = tokens.slice(0, res.node.tokens.length + 1);
+    const node = new Node("EXPONENT", value, resTokens, [res.node]);
+    return new ParseResult(res.tokens, node);
+  }
+  if (tokens[0].type === "BITWISE_NOT_OPERATOR") {
+    if (!(1 in tokens)) {
+      throw new UnexpectedEndError();
+    }
+    const res = parseFunc(tokens.slice(1));
+    if (res === undefined || typeof res.node.value !== "number") {
+      throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+    }
+    const value = bitwiseNotOperator[tokens[0].word](res.node.value);
     const resTokens = tokens.slice(0, res.node.tokens.length + 1);
     const node = new Node("EXPONENT", value, resTokens, [res.node]);
     return new ParseResult(res.tokens, node);
