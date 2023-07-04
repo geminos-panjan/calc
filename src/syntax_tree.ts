@@ -29,6 +29,7 @@ type NodeType =
   | "TERM"
   | "FACTOR"
   | "COEFFICIENT"
+  | "PAREN"
   | "EXPONENT"
   | "FUNCTION"
   | "ALTER"
@@ -177,8 +178,30 @@ const parseFunc = (tokens: Token[]) => {
   return new ParseResult(res.tokens.slice(closeParen), node);
 };
 
-const parseExponent = (tokens: Token[]): ParseResult | undefined => {
+const parseParen = (tokens: Token[]): ParseResult | undefined => {
   const res = parseFunc(tokens);
+  if (res !== undefined) {
+    return res;
+  }
+  if (tokens[0].type !== "OPEN_PAREN") {
+    return undefined;
+  }
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const resExp = parseExpression(tokens.slice(1));
+  if (resExp === undefined) {
+    throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+  }
+  const closeParen =
+    0 in resExp.tokens && resExp.tokens[0].type === "CLOSE_PAREN" ? 1 : 0;
+  const resTokens = tokens.slice(0, resExp.node.tokens.length + 1 + closeParen);
+  const node = new Node("PAREN", resExp.node.value, resTokens, [resExp.node]);
+  return new ParseResult(resExp.tokens.slice(closeParen), node);
+};
+
+const parseExponent = (tokens: Token[]): ParseResult | undefined => {
+  const res = parseParen(tokens);
   if (res !== undefined) {
     return res;
   }
@@ -186,7 +209,7 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
     if (!(1 in tokens)) {
       throw new UnexpectedEndError();
     }
-    const res = parseFunc(tokens.slice(1));
+    const res = parseParen(tokens.slice(1));
     if (res === undefined || typeof res.node.value !== "number") {
       throw new UnexpectedTokenError(`"${tokens[1].word}"`);
     }
@@ -199,7 +222,7 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
     if (!(1 in tokens)) {
       throw new UnexpectedEndError();
     }
-    const res = parseFunc(tokens.slice(1));
+    const res = parseParen(tokens.slice(1));
     if (res === undefined || typeof res.node.value !== "number") {
       throw new UnexpectedTokenError(`"${tokens[1].word}"`);
     }
@@ -207,20 +230,6 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
     const resTokens = tokens.slice(0, res.node.tokens.length + 1);
     const node = new Node("EXPONENT", value, resTokens, [res.node]);
     return new ParseResult(res.tokens, node);
-  }
-  if (tokens[0].type === "OPEN_PAREN") {
-    if (!(1 in tokens)) {
-      throw new UnexpectedEndError();
-    }
-    const res = parseExpression(tokens.slice(1));
-    if (res === undefined) {
-      throw new UnexpectedTokenError(`"${tokens[1].word}"`);
-    }
-    const closeParen =
-      0 in res.tokens && res.tokens[0].type === "CLOSE_PAREN" ? 1 : 0;
-    const resTokens = tokens.slice(0, res.node.tokens.length + 1 + closeParen);
-    const node = new Node("EXPONENT", res.node.value, resTokens, [res.node]);
-    return new ParseResult(res.tokens.slice(closeParen), node);
   }
   return undefined;
 };
@@ -232,7 +241,9 @@ const parseCoefficient = (tokens: Token[]) => {
   }
   if (
     resNum === undefined ||
-    !(["NUMBER", "EXPONENT"] as NodeType[]).includes(resNum.node.type) ||
+    !(["NUMBER", "PAREN", "EXPONENT"] as NodeType[]).includes(
+      resNum.node.type
+    ) ||
     resNum.node.value === undefined
   ) {
     return resNum;
@@ -240,10 +251,12 @@ const parseCoefficient = (tokens: Token[]) => {
   if (!(0 in resNum.tokens)) {
     return resNum;
   }
-  const resFunc = parseFunc(resNum.tokens);
+  const resFunc = parseExponent(resNum.tokens);
   if (
     resFunc === undefined ||
-    !(["CONSTANT", "FUNCTION"] as NodeType[]).includes(resFunc.node.type) ||
+    !(["PAREN", "CONSTANT", "FUNCTION"] as NodeType[]).includes(
+      resFunc.node.type
+    ) ||
     resFunc.node.value === undefined
   ) {
     return resNum;

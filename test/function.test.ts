@@ -1,6 +1,6 @@
 import { FormatType, calculate } from "../src/calculate.js";
 import { ConstantKey, constants } from "../src/constant.js";
-import { funcs } from "../src/func/calc_func.js";
+import { CalcFunctionKey, funcs } from "../src/func/calc_func.js";
 
 const echoCalculation = (text: string, format: FormatType = "DECIMAL") => {
   return `${text} = ${calculate(text, format)}`;
@@ -21,8 +21,18 @@ const echoConstants = () => {
     .join("\n");
 };
 
+const echoFuncs = () => {
+  return Object.keys(funcs)
+    .map((key) => {
+      const c = funcs[key as CalcFunctionKey];
+      return `${key},${c.description.join(" ")}`;
+    })
+    .join("\n");
+};
+
 // console.log(echoIdentifier());
 // console.log(echoConstants());
+// console.log(echoFuncs());
 // console.log(echoCalculation("1+2"));
 // console.log(echoCalculation("2-1"));
 // console.log(echoCalculation("2*3"));
@@ -110,3 +120,6 @@ const echoConstants = () => {
 // console.log(echoCalculation("T", "SI"));
 // console.log(echoCalculation("1e+13", "SI"));
 // console.log(echoCalculation("-1000", "SI"));
+// console.log(echoCalculation("-(1+2)"));
+// console.log(echoCalculation("~(1+2)"));
+// console.log(echoCalculation("2(1+2)"));
