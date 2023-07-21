@@ -26,22 +26,22 @@ const createDivisorList = (start: number, end: number) => {
 const primeFactorize = (
   n: number,
   start: number = 2,
-  primes: { [key: string]: number } = {}
-): { [key: string]: number } => {
+  primes: Map<number, number>
+): Map<number, number> => {
   const divisors = createDivisorList(start, n);
-  if (divisors.length === 0) {
-    primes[String(n)] = 1;
+  if (divisors[0] === undefined) {
+    primes.set(n, 1);
     return primes;
   }
   if (!isDivisible(n, divisors[0])) {
     if (divisors.length === 1) {
-      primes[String(n)] = 1;
+      primes.set(n, 1);
       return primes;
     }
     return primeFactorize(n, divisors[1], primes);
   }
   const div = divRec(n, divisors[0]);
-  primes[String(divisors[0])] = div.depth;
+  primes.set(divisors[0], div.depth);
   if (div.quotient === 1) {
     return primes;
   }
@@ -49,13 +49,12 @@ const primeFactorize = (
 };
 
 export const expressPrimeFactors = (num: number) => {
-  const primes = primeFactorize(num);
-  const keys = Object.keys(primes);
-  if (keys.length < 1) {
+  const primes = primeFactorize(num, 2, new Map<number, number>());
+  if (primes.size < 1) {
     return String(num);
   }
-  return keys
-    .map((k) => String(k) + (primes[k] > 1 ? ` ** ${primes[k]}` : ""))
+  return [...primes]
+    .map(([k, v]) => String(k) + (v > 1 ? ` ** ${v}` : ""))
     .join(" * ");
 };
 
