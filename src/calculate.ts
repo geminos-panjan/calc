@@ -71,13 +71,13 @@ const roundFloat = (n: number) => {
 export const calculate = (
   text: string,
   format?: FormatType,
-  ans: string = ""
+  ans: string = "0"
 ): ASTNodeValue => {
   const replaced = text.replace(/ans/g, ans);
   if (replaced === "") {
     return "";
   }
-  const tokens = createTokenList(text);
+  const tokens = createTokenList(replaced);
   const node = createSyntaxTree(tokens);
   if (typeof node.value === "number") {
     const value = roundFloat(node.value);
