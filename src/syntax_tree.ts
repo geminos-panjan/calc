@@ -6,26 +6,28 @@ import {
   ZeroDivisionError,
 } from "./error.js";
 import {
-  bitwiseNotOperator,
-  bitwiseOperator,
+  unaryOperators,
+  andOperator,
   exponentOperator,
   factorOperators,
-  signOperators,
+  orOperator,
+  shiftOperators,
   termOperators,
+  xorOperator,
+  TermOperatorKey,
+  ShiftOperatorKey,
+  FactorOperatorKey,
+  UnaryOperatorKey,
 } from "./operator.js";
 import { Token, TokenType, createTokenList } from "./token.js";
-import {
-  CalcFunctionKey,
-  executeFunction,
-  funcs,
-  mapNumList,
-} from "./func/calc_func.js";
+import { CalcFunctionKey, executeFunction, funcs } from "./func/calc_func.js";
 
 type NodeType =
   | "EXPRESSION"
   | "BITWISE_OR"
   | "BITWISE_XOR"
   | "BITWISE_AND"
+  | "BITWISE_SHIFT"
   | "TERM"
   | "FACTOR"
   | "COEFFICIENT"
@@ -70,15 +72,19 @@ const parseNumber = (tokens: Token[]) => {
   if (
     !(
       ["BINARY", "HEX", "EXPONENT", "FLOAT", "INTEGER"] as TokenType[]
-    ).includes(tokens[0].type)
+    ).includes(tokens[0]?.type as TokenType)
   ) {
     return undefined;
   }
-  const value = Number(tokens[0].word.replace("_", ""));
+  const value = Number(tokens[0]?.word.replace("_", ""));
   if (isNaN(value)) {
-    throw new InvalidTokenError(`"${tokens[0].word}" is NaN`);
+    throw new InvalidTokenError(`"${tokens[0]?.word}" is NaN`);
   }
-  const node = new Node("NUMBER", value, [tokens[0]]);
+  const node = new Node(
+    "NUMBER",
+    value,
+    tokens[0] !== undefined ? [tokens[0]] : []
+  );
   return new ParseResult(tokens.slice(1), node);
 };
 
@@ -87,10 +93,10 @@ const parseString = (tokens: Token[]) => {
   if (res !== undefined) {
     return res;
   }
-  if (tokens[0].type !== "STRING") {
+  if (tokens[0]?.type !== "STRING") {
     return undefined;
   }
-  const word = tokens[0].word;
+  const word = tokens[0]?.word;
   const value = word.slice(
     1,
     ['"', "'"].includes(word.slice(-1)) ? word.length - 1 : word.length
@@ -136,10 +142,10 @@ const parseConstant = (tokens: Token[]) => {
   if (res !== undefined) {
     return res;
   }
-  if (tokens[0].type !== "CONSTANT") {
+  if (tokens[0]?.type !== "CONSTANT_KEY") {
     return undefined;
   }
-  const value = constants[tokens[0].word as ConstantKey].value;
+  const value = constants[tokens[0]?.word as ConstantKey].value;
   const node = new Node("CONSTANT", value, [tokens[0]]);
   return new ParseResult(tokens.slice(1), node);
 };
@@ -151,7 +157,7 @@ const parseFunc = (tokens: Token[]) => {
       return res;
     }
   }
-  if (tokens[0].type !== "FUNCTION" || !(tokens[0].word in funcs)) {
+  if (tokens[0]?.type !== "FUNCTION_KEY" || !(tokens[0].word in funcs)) {
     return undefined;
   }
   if (!(1 in tokens)) {
@@ -162,7 +168,7 @@ const parseFunc = (tokens: Token[]) => {
   }
   const res = parseArgument(tokens.slice(2));
   const value = executeFunction(
-    tokens[0].word as CalcFunctionKey,
+    tokens[0]?.word as CalcFunctionKey,
     res?.node.children.map((n) => n.value) ?? []
   );
   if (res === undefined) {
@@ -183,7 +189,7 @@ const parseParen = (tokens: Token[]): ParseResult | undefined => {
   if (res !== undefined) {
     return res;
   }
-  if (tokens[0].type !== "OPEN_PAREN") {
+  if (tokens[0]?.type !== "OPEN_PAREN") {
     return undefined;
   }
   if (!(1 in tokens)) {
@@ -205,33 +211,26 @@ const parseExponent = (tokens: Token[]): ParseResult | undefined => {
   if (res !== undefined) {
     return res;
   }
-  if (tokens[0].type === "TERM_OPERATOR") {
-    if (!(1 in tokens)) {
-      throw new UnexpectedEndError();
-    }
-    const res = parseParen(tokens.slice(1));
-    if (res === undefined || typeof res.node.value !== "number") {
-      throw new UnexpectedTokenError(`"${tokens[1].word}"`);
-    }
-    const value = signOperators[tokens[0].word](res.node.value);
-    const resTokens = tokens.slice(0, res.node.tokens.length + 1);
-    const node = new Node("EXPONENT", value, resTokens, [res.node]);
-    return new ParseResult(res.tokens, node);
+  if (
+    !(["TERM_OPERATOR", "NOT_OPERATOR"] as TokenType[]).includes(
+      tokens[0]?.type as TokenType
+    )
+  ) {
+    return undefined;
   }
-  if (tokens[0].type === "BITWISE_NOT_OPERATOR") {
-    if (!(1 in tokens)) {
-      throw new UnexpectedEndError();
-    }
-    const res = parseParen(tokens.slice(1));
-    if (res === undefined || typeof res.node.value !== "number") {
-      throw new UnexpectedTokenError(`"${tokens[1].word}"`);
-    }
-    const value = bitwiseNotOperator[tokens[0].word](res.node.value);
-    const resTokens = tokens.slice(0, res.node.tokens.length + 1);
-    const node = new Node("EXPONENT", value, resTokens, [res.node]);
-    return new ParseResult(res.tokens, node);
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
   }
-  return undefined;
+  const resParen = parseParen(tokens.slice(1));
+  if (resParen === undefined || typeof resParen.node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+  }
+  const value = unaryOperators[tokens[0]?.word as UnaryOperatorKey]?.(
+    resParen.node.value
+  );
+  const resTokens = tokens.slice(0, resParen.node.tokens.length + 1);
+  const node = new Node("EXPONENT", value, resTokens, [resParen.node]);
+  return new ParseResult(resParen.tokens, node);
 };
 
 const parseCoefficient = (tokens: Token[]) => {
@@ -291,7 +290,7 @@ const parseFactor = (tokens: Token[], node?: Node): ParseResult | undefined => {
   if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
-  const value = exponentOperator[tokens[0].word](node.value, res.node.value);
+  const value = exponentOperator(node.value, res.node.value);
   const resTokens = [...node.tokens, tokens[0], ...res.node.tokens];
   const resNode = new Node("FACTOR", value, resTokens, [node, res.node]);
   return parseFactor(res.tokens, resNode);
@@ -326,10 +325,48 @@ const parseTerm = (tokens: Token[], node?: Node): ParseResult | undefined => {
       `"${res.node.tokens.map((t) => t.word).join("")}"`
     );
   }
-  const value = factorOperators[tokens[0].word](node.value, res.node.value);
+  const value = factorOperators[tokens[0].word as FactorOperatorKey]?.(
+    node.value,
+    res.node.value
+  );
   const resTokens = [...node.tokens, tokens[0], ...res.node.tokens];
   const resNode = new Node("TERM", value, resTokens, [node, res.node]);
   return parseTerm(res.tokens, resNode);
+};
+
+const parseBitwiseShift = (
+  tokens: Token[],
+  node?: Node
+): ParseResult | undefined => {
+  if (node === undefined) {
+    const res = parseTerm(tokens);
+    if (res === undefined) {
+      return undefined;
+    }
+    return parseBitwiseShift(res.tokens, res.node);
+  }
+  if (!(0 in tokens) || tokens[0].type !== "SHIFT_OPERATOR") {
+    return new ParseResult(tokens, node);
+  }
+  if (typeof node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[0].word}"`);
+  }
+  if (!(1 in tokens)) {
+    throw new UnexpectedEndError();
+  }
+  const res = parseTerm(tokens.slice(1));
+  if (res === undefined || typeof res.node.value !== "number") {
+    throw new UnexpectedTokenError(`"${tokens[1].word}"`);
+  }
+  const value = shiftOperators[tokens[0]?.word as ShiftOperatorKey]?.(
+    node.value,
+    res.node.value
+  );
+  const resTokens = node.tokens.concat(
+    tokens.slice(0, res.node.tokens.length + 1)
+  );
+  const resNode = new Node("BITWISE_SHIFT", value, resTokens, [node, res.node]);
+  return parseBitwiseAnd(res.tokens, resNode);
 };
 
 const parseBitwiseAnd = (
@@ -337,7 +374,7 @@ const parseBitwiseAnd = (
   node?: Node
 ): ParseResult | undefined => {
   if (node === undefined) {
-    const res = parseTerm(tokens);
+    const res = parseBitwiseShift(tokens);
     if (res === undefined) {
       return undefined;
     }
@@ -356,7 +393,10 @@ const parseBitwiseAnd = (
   if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
-  const value = termOperators[tokens[0].word](node.value, res.node.value);
+  const value = termOperators[tokens[0].word as TermOperatorKey]?.(
+    node.value,
+    res.node.value
+  );
   const resTokens = node.tokens.concat(
     tokens.slice(0, res.node.tokens.length + 1)
   );
@@ -388,7 +428,7 @@ const parseBitwiseXor = (
   if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
-  const value = bitwiseOperator["&"](node.value, res.node.value);
+  const value = andOperator(node.value, res.node.value);
   const resTokens = node.tokens.concat(
     tokens.slice(0, res.node.tokens.length + 1)
   );
@@ -420,7 +460,7 @@ const parseBitwiseOr = (
   if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
-  const value = bitwiseOperator["^"](node.value, res.node.value);
+  const value = xorOperator(node.value, res.node.value);
   const resTokens = node.tokens.concat(
     tokens.slice(0, res.node.tokens.length + 1)
   );
@@ -452,7 +492,7 @@ const parseExpression = (
   if (res === undefined || typeof res.node.value !== "number") {
     throw new UnexpectedTokenError(`"${tokens[1].word}"`);
   }
-  const value = bitwiseOperator["|"](node.value, res.node.value);
+  const value = orOperator(node.value, res.node.value);
   const resTokens = node.tokens.concat(
     tokens.slice(0, res.node.tokens.length + 1)
   );
