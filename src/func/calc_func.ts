@@ -1,4 +1,3 @@
-import { ConstantKey, constants } from "../constant.js";
 import { InvalidArgsError } from "../error.js";
 import { ASTNodeValue } from "../parsing/parsing_syntax.js";
 import { ColorFuctionKey, colorFuncs } from "./color/color_func.js";
@@ -9,6 +8,7 @@ import {
   reduceFuncs,
 } from "./reduction/reduction_func.js";
 import { StringFunctionKey, stringFuncs } from "./string/string_func.js";
+import { supportFuncs } from "./support/support_func.js";
 
 export type CalcFunctionKey =
   | "help"
@@ -26,39 +26,7 @@ export type CalcFunction = {
 };
 
 export const funcs: { [key in CalcFunctionKey]: CalcFunction } = Object.assign(
-  {
-    help: {
-      funcs: {
-        1: (s: any) => {
-          if (s in constants) {
-            return constants[s as ConstantKey].description.join(" ");
-          }
-          if (s in funcs) {
-            return funcs[s as CalcFunctionKey].description.join(" ");
-          }
-          throw new InvalidArgsError(String(s));
-        },
-      },
-      description: ['help("s") 定数または関数sの説明を返す'],
-    },
-    search: {
-      funcs: {
-        1: (s: any) => {
-          if (s === "") {
-            throw new InvalidArgsError('""');
-          }
-          const ids = Object.keys(Object.assign({}, constants, funcs));
-          return ids
-            .filter((v) =>
-              v.toLocaleLowerCase().startsWith(s.toLocaleLowerCase())
-            )
-            .sort((a, b) => a.localeCompare(b))
-            .join(" ");
-        },
-      },
-      description: ['search("s") sから始まる定数または関数名を返す'],
-    },
-  },
+  supportFuncs,
   colorFuncs,
   dateFuncs,
   mathFuncs,
@@ -83,6 +51,13 @@ export const parseNumList = (n: ASTNodeValue): number[] => {
     throw new InvalidArgsError(String(n));
   }
   return n.map((v) => parseNum(v));
+};
+
+export const parseStringList = (n: ASTNodeValue): string[] => {
+  if (!Array.isArray(n)) {
+    throw new InvalidArgsError(String(n));
+  }
+  return n.map((v) => parseString(v));
 };
 
 export const executeFunction = (
