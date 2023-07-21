@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "build": "tsc && cp package.json dist/",
+    "build": "rm -r dist/* && tsc && cp package.json dist/",
     "inter": "ts-node --esm test/interaction.ts",
     "test": "tsc&&set NODE_OPTIONS=--experimental-vm-modules&&jest",
     "clean": "rm -rv dist/*"
