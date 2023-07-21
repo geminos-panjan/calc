@@ -136,7 +136,7 @@ export const parsingRules: ParsingRule[] = [
           if (nodes[0]?.value === undefined) {
             throw new InvalidTokenError(String(nodes[0]?.value ?? ""));
           }
-          return String(nodes[0]?.value ?? "").replace(/^"|"$/g, "");
+          return String(nodes[0]?.value ?? "").replace(/^['"]|['"]$/g, "");
         },
       },
     ],
