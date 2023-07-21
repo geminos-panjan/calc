@@ -1,7 +1,12 @@
 import { InvalidArgsError } from "../../error.js";
 import { suddenDeath } from "./sudden.js";
 import { full2half } from "./full2half.js";
-import { CalcFunction, parseNum, parseString } from "../calc_func.js";
+import {
+  CalcFunction,
+  parseNum,
+  parseNumList,
+  parseString,
+} from "../calc_func.js";
 
 export type StringFunctionKey =
   | "char"
@@ -14,26 +19,31 @@ export type StringFunctionKey =
 
 export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
   char: {
-    funcs: {
-      1: (cp) => {
-        const cpNum = parseNum(cp);
-        return String.fromCodePoint(cpNum);
-      },
+    func: (cpList) => {
+      return parseNumList(cpList)
+        .map((cp) => String.fromCodePoint(cp))
+        .join("");
     },
-    description: ["char(cp) コードポイントcpに対応する文字"],
+    description: [
+      "char(cp1, cp2, ...) コードポイントcp1, cp2, ...に対応する文字列",
+    ],
   },
   unicode: {
     funcs: {
       1: (s) => {
-        const c = Array.from(parseString(s)).slice(-1)[0];
-        const cp = c?.codePointAt(0);
-        if (cp === undefined) {
-          throw new InvalidArgsError(`unicode("c"), ${c} is invalid`);
-        }
-        return "U+" + cp.toString(16);
+        const chars = Array.from(parseString(s));
+        return chars
+          .map((c) => {
+            const cp = c?.codePointAt(0);
+            if (cp === undefined) {
+              throw new InvalidArgsError(`unicode("c"), ${c} is invalid`);
+            }
+            return "U+" + cp.toString(16);
+          })
+          .join(", ");
       },
     },
-    description: ['unicode("c") cのコードポイント'],
+    description: ['unicode("s") sのコードポイントのリスト'],
   },
   dash: {
     funcs: {
