@@ -6,8 +6,8 @@
   "types": "index.d.ts",
   "scripts": {
     "build": "rm -r dist/* && tsc && cp package.json dist/",
-    "inter": "ts-node --esm test/interaction.ts",
-    "test": "tsc&&set NODE_OPTIONS=--experimental-vm-modules&&jest",
+    "inter": "node test/interaction.js",
+    "test": "set NODE_OPTIONS=--experimental-vm-modules&&jest",
     "clean": "rm -rv dist/*"
   },
   "keywords": [],
