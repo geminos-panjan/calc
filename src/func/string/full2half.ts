@@ -90,5 +90,5 @@ const full2halfData: { [key: string]: string } = {
 export const full2half = (text: string) => {
   const keys = Object.keys(full2halfData).join();
   const re = new RegExp(`[${keys}]`, "g");
-  return text.replace(re, (match) => full2halfData[match]);
+  return text.replace(re, (match) => full2halfData[match] ?? match);
 };

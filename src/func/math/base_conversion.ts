@@ -10,10 +10,11 @@ export const decimal = (nonDecimal: string, base: number) => {
     if (isNaN(p)) {
       return NaN;
     }
-    if (!(c in NUMS)) {
+    const num = NUMS[c];
+    if (num === undefined) {
       return NaN;
     }
-    return p + NUMS[c] * base ** (nonDecimal.length - 1 - i);
+    return p + num * base ** (nonDecimal.length - 1 - i);
   }, 0);
 };
 
