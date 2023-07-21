@@ -1,5 +1,5 @@
 import { InvalidArgsError } from "../../error.js";
-import { CalcFunction } from "../calc_func.js";
+import { CalcFunction, parseNum, parseString } from "../calc_func.js";
 import { MyDate } from "./date.js";
 
 export type DateFunctionKey = "date" | "time";
@@ -8,11 +8,9 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
   date: {
     funcs: {
       0: () => new MyDate().format("yyyy-MM-dd HH:mm:ss.SSS"),
-      1: (n: any) => {
-        if (isNaN(Number(n))) {
-          throw new InvalidArgsError(`"${n}"`);
-        }
-        const d = new MyDate(n);
+      1: (n) => {
+        const num = parseNum(n);
+        const d = new MyDate(num);
         return d.format("yyyy-MM-dd HH:mm:ss.SSS");
       },
     },
@@ -24,12 +22,13 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
   time: {
     funcs: {
       0: () => Date.now(),
-      1: (s: any) => {
+      1: (s) => {
         const regex =
           /(\d{4})[^\d]*(\d{2})?[^\d]*(\d{2})?[^\d]*(\d{2})?[^\d]*(\d{2})?[^\d]*(\d{2})?[^\d]*(\d{3})?/;
-        const m = regex.exec(String(s));
+        const str = parseString(s);
+        const m = regex.exec(str);
         if (m === null) {
-          throw new InvalidArgsError(`"${s}"`);
+          throw new InvalidArgsError(str);
         }
         const yyyy = Number(m[1] ?? 0);
         const MM = Number(m[2] ?? 1) - 1;
@@ -44,7 +43,7 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
     },
     description: [
       "1. time() 現在のUNIX時間[ミリ秒]",
-      '2. time(t) "yyyyMMddHHmmssSSS"形式の時間tからUNIX時間[ミリ秒]に変換',
+      '2. time("t") "yyyyMMddHHmmssSSS"形式の時間tからUNIX時間[ミリ秒]に変換',
       '"2038年01月19日03時14分07秒"のように間に文字が入っていても可',
       "ただし0埋めは必要",
     ],

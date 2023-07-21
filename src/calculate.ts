@@ -1,8 +1,8 @@
 import { constants } from "./constant.js";
-import { createSyntaxTree } from "./syntax_tree.js";
+import { ASTNodeValue, createSyntaxTree } from "./parsing/parsing_syntax.js";
 import { TokenType, createTokenList } from "./token.js";
 
-export type FormatType = "DECIMAL" | "BINARY" | "HEX" | "EXPONENT" | "SI";
+export type FormatType = "DECIMAL" | "BINARY" | "HEX" | "EXPONENTIAL" | "SI";
 
 export const formatsTypes: { [key in FormatType]: (n: number) => string } = {
   DECIMAL: (n) => n.toString(10),
@@ -14,7 +14,7 @@ export const formatsTypes: { [key in FormatType]: (n: number) => string } = {
     const hex = n.toString(16);
     return "0x" + hex.padStart(Math.ceil(hex.length / 2) * 2, "0");
   },
-  EXPONENT: (n) => n.toExponential(),
+  EXPONENTIAL: (n) => n.toExponential(),
   SI: (n) => {
     if (n === 0) {
       return "0";
@@ -58,11 +58,11 @@ const roundFloat = (n: number) => {
   const text = n.toString();
   const zero = /\.\d*?[^0]?(0{6,}\d*)/.exec(text);
   if (zero != undefined) {
-    return Number(text.replace(zero[1], ""));
+    return Number(text.replace(zero[1] ?? "", ""));
   }
   const nine = /(\.\d*?[^9]?)9{6,}\d*/.exec(text);
   if (nine != undefined) {
-    const exp = 10 ** nine[1].length;
+    const exp = 10 ** (nine[1]?.length ?? 1);
     return Math.round(n * exp) / exp;
   }
   return n;
@@ -72,32 +72,34 @@ export const calculate = (
   text: string,
   format?: FormatType,
   ans: string = ""
-) => {
+): ASTNodeValue => {
   const replaced = text.replace(/ans/g, ans);
   if (replaced === "") {
     return "";
   }
-  const tokens = createTokenList(replaced);
+  const tokens = createTokenList(text);
   const node = createSyntaxTree(tokens);
-  if (typeof node.value === "string") {
-    return node.value;
+  if (typeof node.value === "number") {
+    const value = roundFloat(node.value);
+    if (format !== undefined) {
+      return formatsTypes[format](value);
+    }
+    const nums = tokens.filter((t) =>
+      (
+        ["BINARY", "EXPONENTIAL", "FLOAT", "HEX", "INTEGER"] as TokenType[]
+      ).includes(t.type)
+    );
+    if (
+      nums[0] !== undefined &&
+      (["BINARY", "HEX", "EXPONENTIAL"] as FormatType[]).includes(
+        nums[0].type as FormatType
+      )
+    ) {
+      return formatsTypes[nums[0].type as FormatType](value);
+    }
+    return value;
   }
-  const value = roundFloat(node.value);
-  if (format !== undefined) {
-    return formatsTypes[format](value);
-  }
-  const nums = tokens.filter((t) =>
-    (["BINARY", "EXPONENT", "FLOAT", "HEX", "INTEGER"] as TokenType[]).includes(
-      t.type
-    )
-  );
-  if (
-    0 in nums &&
-    (["BINARY", "HEX"] as FormatType[]).includes(nums[0].type as FormatType)
-  ) {
-    return formatsTypes[nums[0].type as FormatType](value);
-  }
-  return value.toString();
+  return node.value;
 };
 
 // console.log(calculate("2 * 3"));
