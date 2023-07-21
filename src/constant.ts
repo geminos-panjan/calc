@@ -34,7 +34,9 @@ export type ConstantKey =
   | "months"
   | "years"
   | "rad"
-  | "ans";
+  | "ans"
+  | "NaN"
+  | "Infinity";
 
 export const constants: { [key in ConstantKey]: Constant } = {
   pi: {
@@ -160,5 +162,13 @@ export const constants: { [key in ConstantKey]: Constant } = {
   ans: {
     value: 0,
     description: ["前回の計算結果"],
+  },
+  NaN: {
+    value: NaN,
+    description: ["非数 (Not a Number)"],
+  },
+  Infinity: {
+    value: Infinity,
+    description: ["無限大"],
   },
 };
