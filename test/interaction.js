@@ -17,7 +17,9 @@ const interaction = () => {
       console.log(result);
     } catch (ex) {
       if (ex instanceof Error) {
-        console.error(ex.message);
+        console.error(
+          ex.name + (ex.message.length > 0 ? `: ${ex.message}` : "")
+        );
         // console.error(ex.stack);
       }
     }
