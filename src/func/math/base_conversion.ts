@@ -9,13 +9,12 @@ export const decimal = (nonDecimal: string, base: number): number => {
   if (base < 2 || 64 < base) {
     return NaN;
   }
-  const upper = base < 37 ? nonDecimal.toLocaleUpperCase() : nonDecimal;
-  return [...upper].reduce((p, c, i) => {
+  return [...nonDecimal].reduce((p, c, i) => {
     if (isNaN(p)) {
       return NaN;
     }
-    const num = NUMS[c];
-    if (num === undefined) {
+    const num = (NUMS[c] ?? 0) < base ? NUMS[c] : NUMS[c.toLocaleUpperCase()];
+    if (num === undefined || num >= base) {
       return NaN;
     }
     return p + num * base ** (nonDecimal.length - 1 - i);
