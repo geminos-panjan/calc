@@ -31,7 +31,7 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
   unicode: {
     funcs: {
       1: (s) => {
-        const chars = Array.from(parseString(s));
+        const chars = [...parseString(s)];
         return chars
           .map((c) => {
             const cp = c?.codePointAt(0);
@@ -48,7 +48,7 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
   dash: {
     funcs: {
       1: (s) => {
-        return Array.from(parseString(s))
+        return [...parseString(s)]
           .map((c) => {
             const re =
               /[がぎぐげござじずぜぞだぢづでどばびぶべぼガギグゲゴザジズゼゾダヂヅデドバビブベボ]/;
@@ -73,7 +73,7 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
   },
   space: {
     funcs: {
-      1: (s) => Array.from(parseString(s)).join("\u3000"),
+      1: (s) => [...parseString(s)].join("\u3000"),
     },
     description: ['space("s") 全角スペースを挿入'],
   },
@@ -90,7 +90,7 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
   },
   length: {
     funcs: {
-      1: (s) => Array.from(parseString(s)).length,
+      1: (s) => [...parseString(s)].length,
     },
     description: ['length("s") sの文字数'],
   },

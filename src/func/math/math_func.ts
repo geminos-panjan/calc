@@ -194,14 +194,15 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
             10: "",
             16: "0x",
           };
-          const num = Number(prefix[fromBaseNum] + str);
+          const num = Number(prefix[fromBaseNum] + str.replace(/-/, ""));
           if (isNaN(num)) {
             throw new InvalidArgsError(
               `cvtbase(s, from, to), "${str}" is not a number`
             );
           }
           if ([2, 8, 10, 16].includes(toBaseNum)) {
-            return num.toString(toBaseNum);
+            const out = prefix[toBaseNum] + num.toString(toBaseNum);
+            return str.startsWith("-") ? "-" + out : out;
           }
           return convertBase(num, toBaseNum);
         }

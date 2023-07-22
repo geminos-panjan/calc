@@ -89,7 +89,11 @@ const findMatchWord = (
       return { type, word, nextWord };
     }
   }
-  return { type: "ERROR", word: text.slice(0, 1), nextWord: text.slice(1) };
+  return {
+    type: "ERROR",
+    word: [...text].slice(0, 1)[0] ?? "",
+    nextWord: [...text].slice(1).join(""),
+  };
 };
 
 const updateParenDepth = (tokens: Token[]) => {

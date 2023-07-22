@@ -1,12 +1,16 @@
 const CHARS =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
-const NUMS = Array.from(CHARS).reduce<{ [key: string]: number }>((p, c, i) => {
+const NUMS = [...CHARS].reduce<{ [key: string]: number }>((p, c, i) => {
   p[c] = i;
   return p;
 }, {});
 
-export const decimal = (nonDecimal: string, base: number) => {
-  return Array.from(nonDecimal).reduce((p, c, i) => {
+export const decimal = (nonDecimal: string, base: number): number => {
+  if (base < 2 || 64 < base) {
+    return NaN;
+  }
+  const upper = base < 37 ? nonDecimal.toLocaleUpperCase() : nonDecimal;
+  return [...upper].reduce((p, c, i) => {
     if (isNaN(p)) {
       return NaN;
     }
