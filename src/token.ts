@@ -142,7 +142,7 @@ export const addParens = (
       tokens: newTokens,
     };
   }
-  return { openParens: 0, closeParens: 0, tokens };
+  return { openParens: 0, closeParens: 0, tokens: updateParenDepth(tokens) };
 };
 
 export const createTokenList = (text: string) => {
