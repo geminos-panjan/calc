@@ -7,12 +7,14 @@ export type FormatType = "DECIMAL" | "BINARY" | "HEX" | "EXPONENTIAL" | "SI";
 export const formatsTypes: { [key in FormatType]: (n: number) => string } = {
   DECIMAL: (n) => n.toString(10),
   BINARY: (n) => {
-    const bin = n.toString(2);
-    return "0b" + bin.padStart(Math.ceil(bin.length / 4) * 4, "0");
+    const bin = Math.abs(n).toString(2);
+    const pad = "0b" + bin.padStart(Math.ceil(bin.length / 4) * 4, "0");
+    return n < 0 ? "-" + pad : pad;
   },
   HEX: (n) => {
-    const hex = n.toString(16);
-    return "0x" + hex.padStart(Math.ceil(hex.length / 2) * 2, "0");
+    const hex = Math.abs(n).toString(16);
+    const pad = "0x" + hex.padStart(Math.ceil(hex.length / 2) * 2, "0");
+    return n < 0 ? "-" + pad : pad;
   },
   EXPONENTIAL: (n) => n.toExponential(),
   SI: (n) => {
