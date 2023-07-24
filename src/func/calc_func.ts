@@ -9,6 +9,7 @@ import {
 } from "./reduction/reduction_func.js";
 import { StringFunctionKey, stringFuncs } from "./string/string_func.js";
 import { supportFuncs } from "./support/support_func.js";
+import { weatherFuncs } from "./weather/weather_func.js";
 
 export type CalcFunctionKey =
   | "help"
@@ -31,7 +32,8 @@ export const funcs: { [key in CalcFunctionKey]: CalcFunction } = Object.assign(
   dateFuncs,
   mathFuncs,
   reduceFuncs,
-  stringFuncs
+  stringFuncs,
+  weatherFuncs
 );
 
 export const parseNum = (n: ASTNodeValue): number => {

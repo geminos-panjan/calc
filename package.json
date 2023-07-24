@@ -1,12 +1,13 @@
 {
   "name": "@geminos-panjan/calc",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "A calculator by TypeScript",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "build": "rm -r dist/* && tsc && cp package.json dist/",
     "inter": "node test/interaction.js",
+    "inter:ts": "ts-node --esm test/interaction.ts",
     "test": "set NODE_OPTIONS=--experimental-vm-modules&&jest",
     "clean": "rm -rv dist/*"
   },

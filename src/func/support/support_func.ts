@@ -15,10 +15,10 @@ export const supportFuncs: { [key in SupportFunctionKey]: CalcFunction } = {
       1: (s) => {
         const str = parseString(s);
         if (str in constants) {
-          return constants[str as ConstantKey].description.join(" ");
+          return constants[str as ConstantKey].description.join("\n");
         }
         if (str in funcs) {
-          return funcs[str as CalcFunctionKey].description.join(" ");
+          return funcs[str as CalcFunctionKey].description.join("\n");
         }
         throw new InvalidArgsError(str);
       },
