@@ -1,3 +1,9 @@
+/**
+ * aがbで割り切れるか
+ * @param a 被除数
+ * @param b 除数
+ * @returns 割り切れるか
+ */
 const isDivisible = (a: number, b: number) => {
   if (a < 2 || b < 2) {
     return false;
@@ -5,51 +11,65 @@ const isDivisible = (a: number, b: number) => {
   return a % b === 0;
 };
 
-const divRec = (
-  a: number,
-  b: number,
-  d: number = 0
-): { quotient: number; depth: number } => {
-  if (!isDivisible(a, b)) {
-    return { quotient: a, depth: d };
+/**
+ * aを割り切れるまでbで割る
+ * @param a 被除数
+ * @param b 除数
+ * @returns 割り切った商と割った回数
+ */
+const divRec = (a: number, b: number): { quotient: number; depth: number } => {
+  let quotient = a;
+  let depth = 0;
+  while (quotient > 1 && isDivisible(quotient, b)) {
+    quotient /= b;
+    depth++;
   }
-  return divRec(a / b, b, d + 1);
+  return { quotient, depth };
 };
 
-const createDivisorList = (start: number, end: number) => {
-  const max = Math.sqrt(end);
-  const len = Math.floor((max - (max % 3)) / 2);
-  const divisors = new Array(len).fill(0).map((_, i) => 3 + i * 2);
-  return [2, ...divisors].filter((d) => d >= start);
-};
-
-const primeFactorize = (
-  n: number,
-  start: number = 2,
-  primes: Map<number, number>
-): Map<number, number> => {
-  const divisors = createDivisorList(start, n);
-  if (divisors[0] === undefined) {
-    primes.set(n, 1);
-    return primes;
+/**
+ * 素因数分解
+ * @param n 素因数分解する数
+ * @returns 素数と、その素数をかける回数のMap
+ */
+const primeFactorize = (n: number): Map<number, number> => {
+  const primes = new Map<number, number>();
+  // 2で割り切っておく
+  if (isDivisible(n, 2)) {
+    const div = divRec(n, 2);
+    n = div.quotient;
+    primes.set(2, div.depth);
   }
-  if (!isDivisible(n, divisors[0])) {
-    if (divisors.length === 1) {
-      primes.set(n, 1);
-      return primes;
+  let divisor = 3;
+  while (true) {
+    const maxDivisor = Math.sqrt(n);
+    // 除数が被除数の平方根以上ならばbreak
+    if (divisor >= maxDivisor) {
+      // nが1以上ならば素数に追加
+      if (n > 1) {
+        primes.set(n, 1);
+      }
+      break;
     }
-    return primeFactorize(n, divisors[1], primes);
+    // 除数で割り切れなければcontinue
+    if (!isDivisible(n, divisor)) {
+      divisor += 2;
+      continue;
+    }
+    const div = divRec(n, divisor);
+    primes.set(divisor, div.depth);
+    // 割り切れればbreak
+    if (div.quotient <= 1) {
+      break;
+    }
+    n = div.quotient;
+    divisor += 2;
   }
-  const div = divRec(n, divisors[0]);
-  primes.set(divisors[0], div.depth);
-  if (div.quotient === 1) {
-    return primes;
-  }
-  return primeFactorize(div.quotient, divisors[1], primes);
+  return primes;
 };
 
 export const expressPrimeFactors = (num: number) => {
-  const primes = primeFactorize(num, 2, new Map<number, number>());
+  const primes = primeFactorize(num);
   if (primes.size < 1) {
     return String(num);
   }
@@ -61,4 +81,4 @@ export const expressPrimeFactors = (num: number) => {
 // console.log(expressPrimeFactors(9991));
 // console.log(expressPrimeFactors(732));
 // console.log(expressPrimeFactors(128));
-// console.log(expressPrimeFactors(1000));
+// console.log(expressPrimeFactors(2623561561));
