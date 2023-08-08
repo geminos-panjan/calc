@@ -89,6 +89,24 @@ const reduceNumber = (nodes: ASTNode[]): ASTNodeValue => {
 };
 
 /**
+ * ノードリストから十六進数を得る
+ * @param nodes 抽象構文木ノードリスト
+ * @returns 十六進数
+ */
+const reduceHex = (nodes: ASTNode[]): ASTNodeValue => {
+  try {
+    if (nodes[0]?.value == undefined) throw new Error();
+    const value = String(nodes[0].value);
+    const replaced = value.replace(/^(U\+|#)/i, "0x");
+    const hex = Number(replaced);
+    if (isNaN(hex)) throw new Error();
+    return hex;
+  } catch (_) {
+    throw new InvalidTokenError(String(nodes[0]?.value ?? ""));
+  }
+};
+
+/**
  * ノードリストを単項被演算子と解釈して数値を得る
  * @param nodes 抽象構文木ノードリスト
  * @returns 数値
@@ -121,7 +139,7 @@ export const parsingRules: ParsingRule[] = [
     state: "NUMBER",
     patterns: [
       { states: ["BINARY"], reducer: reduceNumber },
-      { states: ["HEX"], reducer: reduceNumber },
+      { states: ["HEX"], reducer: reduceHex },
       { states: ["EXPONENTIAL"], reducer: reduceNumber },
       { states: ["FLOAT"], reducer: reduceNumber },
       { states: ["INTEGER"], reducer: reduceNumber },

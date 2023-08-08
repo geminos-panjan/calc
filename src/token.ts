@@ -47,7 +47,7 @@ export const tokenParsers: TokenParser[] = [
   { pattern: /("(\\"|[^"])*"?|'(\\'|[^'])*'?)/, type: "STRING" },
   { pattern: /\s+/, type: "SPACE" },
   { pattern: /0b[01_]+/i, type: "BINARY" },
-  { pattern: /0x[\da-f_]+/i, type: "HEX" },
+  { pattern: /(0x|U\+|#)[\da-f_]+/i, type: "HEX" },
   {
     pattern: /([\d_]*\.[\d_]+|[\d_]+\.[\d_]*|[\d_]+)e[+-]?[\d_]+/i,
     type: "EXPONENTIAL",
@@ -229,3 +229,4 @@ export const joinTokenList = (tokens: Token[]) => {
 // console.log(echoTokenList("2**3**2"));
 // console.log(echoTokenList("2**(3**2"));
 // console.log(echoTokenList("2**3)**2"));
+// console.log(echoTokenList("0x1b3U+2f#1f"));
