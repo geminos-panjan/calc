@@ -13,7 +13,7 @@ export const weatherFuncs: { [key in WeatherFunctionKey]: CalcFunction } = {
         const temper = convertTemperature(num, fromUnit as TempUnit, "C");
         if (temper === undefined) {
           throw new InvalidArgsError(
-            'temper(n, "from") Invalid Temperature Unit'
+            'temper(T, "from") Invalid Temperature Unit'
           );
         }
         return temper;
@@ -29,15 +29,15 @@ export const weatherFuncs: { [key in WeatherFunctionKey]: CalcFunction } = {
         );
         if (temper === undefined) {
           throw new InvalidArgsError(
-            'temper(n, "from", "to") Invalid Temperature Unit'
+            'temper(T, "from", "to") Invalid Temperature Unit'
           );
         }
         return temper;
       },
     },
     description: [
-      '1. temper(n, "from") nを温度単位fromからセルシウス温度に変換',
-      '2. temper(n, "from", "to") nを温度単位fromから温度単位toに変換',
+      '1. temper(T, "from") Tを温度単位fromから摂氏に変換',
+      '2. temper(T, "from", "to") Tを温度単位fromから温度単位toに変換',
       "温度単位はC(摂氏), F(華氏), K(絶対温度)に対応",
     ],
   },
@@ -45,24 +45,24 @@ export const weatherFuncs: { [key in WeatherFunctionKey]: CalcFunction } = {
     funcs: {
       1: (n) => parseNum(n) * 1.8 + 32,
     },
-    description: ["C2F(n) °C → °F"],
+    description: ["C2F(T) °C → °F"],
   },
   C2K: {
     funcs: {
       1: (n) => parseNum(n) - ZERO_K,
     },
-    description: ["C2K(n) °C → K"],
+    description: ["C2K(T) °C → K"],
   },
   F2C: {
     funcs: {
       1: (n) => (parseNum(n) - 32) / 1.8,
     },
-    description: ["F2C(n) °F → °C"],
+    description: ["F2C(T) °F → °C"],
   },
   K2C: {
     funcs: {
       1: (n) => parseNum(n) + ZERO_K,
     },
-    description: ["K2C(n) K → °C"],
+    description: ["K2C(T) K → °C"],
   },
 };
