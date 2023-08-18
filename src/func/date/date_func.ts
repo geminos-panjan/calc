@@ -38,9 +38,8 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
     },
     description: [
       "1. time() 現在のUNIX時間[ミリ秒]",
-      '2. time("t") "yyyyMMddHHmmssSSS"形式の時間tからUNIX時間[ミリ秒]に変換',
-      '"2038年01月19日03時14分07秒"のように間に文字が入っていても可',
-      "ただし0埋めは必要",
+      '2. time("t") "y-M-d H:m:s.S"形式の時間tからUNIX時間[ミリ秒]に変換',
+      "-, :, .は別の文字でも可",
     ],
   },
   now: {
@@ -55,15 +54,14 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
         const str = parseString(s);
         const calendar = calendarFromJapaneseToGregorian(str);
         if (calendar == undefined) {
-          throw new InvalidArgsError(`calendar_j2g("s") Invalid year`);
+          throw new InvalidArgsError(`calendar_j2g("s") Invalid date`);
         }
         return calendar;
       },
     },
     description: [
-      'calendar_j2g("s") "年号yyMMdd"形式の日付sからグレゴリオ暦の日付に変換',
-      '"平成元年01月08日"のように間に文字が入っていても可',
-      "ただし0埋めは必要",
+      'calendar_j2g("s") "年号y年M月d日"形式の日付sからグレゴリオ暦の日付に変換',
+      "年, 月, 日は別の文字でも可",
     ],
   },
   calendar_g2j: {
@@ -78,9 +76,8 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
       },
     },
     description: [
-      'calendar_g2j("s") "yyyyMMdd"形式の日付sから和暦の日付に変換',
-      '"1989年01月08日"のように間に文字が入っていても可',
-      "ただし0埋めは必要",
+      'calendar_g2j("s") "y-M-d"形式の日付sから和暦の日付に変換',
+      "-は別の文字でも可",
     ],
   },
 };
