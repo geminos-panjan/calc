@@ -37,7 +37,7 @@ export type ConstantKey =
   | "ans"
   | "NaN"
   | "Infinity"
-  | "acre"
+  | "ac"
   | "bbl"
   | "gal"
   | "qt"
@@ -181,9 +181,9 @@ export const constants: { [key in ConstantKey]: Constant } = {
     value: Infinity,
     description: ["無限大"],
   },
-  acre: {
-    value: 4046,
-    description: ["1エーカー = 4046m^2"],
+  ac: {
+    value: 4046.8564224,
+    description: ["1エーカー = 4046.8564224m^2"],
   },
   bbl: {
     value: 158.987294928,
