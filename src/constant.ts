@@ -26,13 +26,13 @@ export type ConstantKey =
   | "Ti"
   | "c"
   | "g"
-  | "seconds"
-  | "minutes"
-  | "hours"
-  | "days"
-  | "weeks"
-  | "months"
-  | "years"
+  | "sec"
+  | "min"
+  | "h"
+  | "d"
+  | "w"
+  | "mon"
+  | "y"
   | "rad"
   | "ans"
   | "NaN"
@@ -137,31 +137,31 @@ export const constants: { [key in ConstantKey]: Constant } = {
     value: 9.806_65,
     description: ["重力加速度 9.806 65m/s^2"],
   },
-  seconds: {
+  sec: {
     value: 1e3,
-    description: ["1s = 1000ms"],
+    description: ["1sec = 1000ms"],
   },
-  minutes: {
+  min: {
     value: 6e4,
-    description: ["1min = 60s"],
+    description: ["1min = 60sec"],
   },
-  hours: {
+  h: {
     value: 36e5,
     description: ["1h = 60min"],
   },
-  days: {
+  d: {
     value: 864e5,
     description: ["1d = 24h"],
   },
-  weeks: {
+  w: {
     value: 6048e5,
     description: ["1w = 7d"],
   },
-  months: {
+  mon: {
     value: 2592e6,
-    description: ["1M = 30d"],
+    description: ["1mon = 30d"],
   },
-  years: {
+  y: {
     value: 31536e6,
     description: ["1y = 365d"],
   },
