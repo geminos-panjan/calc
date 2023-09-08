@@ -6,11 +6,11 @@ type Constant = {
 export type ConstantKey =
   | "pi"
   | "e"
-  | "lbm"
-  | "inch"
-  | "feet"
-  | "yard"
-  | "mile"
+  | "lb"
+  | "in"
+  | "ft"
+  | "yd"
+  | "mi"
   | "kt"
   | "p"
   | "n"
@@ -36,7 +36,17 @@ export type ConstantKey =
   | "rad"
   | "ans"
   | "NaN"
-  | "Infinity";
+  | "Infinity"
+  | "acre"
+  | "bbl"
+  | "gal"
+  | "qt"
+  | "pt"
+  | "floz"
+  | "fldr"
+  | "oz"
+  | "dr"
+  | "gr";
 
 export const constants: { [key in ConstantKey]: Constant } = {
   pi: {
@@ -47,25 +57,25 @@ export const constants: { [key in ConstantKey]: Constant } = {
     value: Math.E,
     description: ["ネイピア数"],
   },
-  lbm: {
+  lb: {
     value: 0.45359237,
     description: ["1ポンド = 0.45359237kg"],
   },
-  inch: {
+  in: {
     value: 25.4,
-    description: ["1インチ = 25.4mm"],
+    description: ["1インチ = 1/12フィート(ft) = 25.4mm"],
   },
-  feet: {
+  ft: {
     value: 0.3048,
-    description: ["1フィート = 0.3048m"],
+    description: ["1フィート = 1/3ヤード(yd) = 0.3048m"],
   },
-  yard: {
+  yd: {
     value: 0.9144,
     description: ["1ヤード = 0.9144m"],
   },
-  mile: {
+  mi: {
     value: 1.609344,
-    description: ["1マイル = 1.609344km"],
+    description: ["1マイル = 1760ヤード(yd) = 1.609344km"],
   },
   kt: {
     value: 1.852,
@@ -170,5 +180,45 @@ export const constants: { [key in ConstantKey]: Constant } = {
   Infinity: {
     value: Infinity,
     description: ["無限大"],
+  },
+  acre: {
+    value: 4046,
+    description: ["1エーカー = 4046m^2"],
+  },
+  bbl: {
+    value: 158.987294928,
+    description: ["1バレル = 42米液量ガロン(gal)"],
+  },
+  gal: {
+    value: 3.785411784,
+    description: ["1米液量ガロン = 3.785411784L"],
+  },
+  qt: {
+    value: 0.9464,
+    description: ["1米液量クォート = 1/4米液量ガロン(gal) = 0.9464L"],
+  },
+  pt: {
+    value: 0.4732,
+    description: ["1米液量パイント = 1/2米液量クォート(qt) = 0.4732L"],
+  },
+  floz: {
+    value: 29.57,
+    description: ["1米液量オンス = 1/16米液量パイント(pt) = 29.57mL"],
+  },
+  fldr: {
+    value: 3.6967,
+    description: ["1液量ドラム = 1/8米液量オンス(floz) = 3.6967mL"],
+  },
+  oz: {
+    value: 28.349523125,
+    description: ["1オンス = 1/16ポンド(lb) = 28.349523125g"],
+  },
+  dr: {
+    value: 1.7718451953125,
+    description: ["1ドラム = 1/16オンス(oz) = 1.7718451953125g"],
+  },
+  gr: {
+    value: 64.79891,
+    description: ["1グレーン = 1/7000ポンド(lb) = 64.79891mg"],
   },
 };
