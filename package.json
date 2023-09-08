@@ -1,6 +1,6 @@
 {
   "name": "@geminos-panjan/calc",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "description": "A calculator by TypeScript",
   "main": "index.js",
   "types": "index.d.ts",

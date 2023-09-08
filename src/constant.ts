@@ -139,31 +139,31 @@ export const constants: { [key in ConstantKey]: Constant } = {
   },
   sec: {
     value: 1e3,
-    description: ["1sec = 1000ms"],
+    description: ["1秒 = 1000ms"],
   },
   min: {
     value: 6e4,
-    description: ["1min = 60sec"],
+    description: ["1分 = 60秒(sec)"],
   },
   h: {
     value: 36e5,
-    description: ["1h = 60min"],
+    description: ["1時間 = 60分(min)"],
   },
   d: {
     value: 864e5,
-    description: ["1d = 24h"],
+    description: ["1日 = 24時間(h)"],
   },
   w: {
     value: 6048e5,
-    description: ["1w = 7d"],
+    description: ["1週間 = 7日(d)"],
   },
   mon: {
     value: 2592e6,
-    description: ["1mon = 30d"],
+    description: ["1ヶ月 = 30日(d)"],
   },
   y: {
     value: 31536e6,
-    description: ["1y = 365d"],
+    description: ["1年 = 365日(d)"],
   },
   rad: {
     value: Math.PI / 180,
