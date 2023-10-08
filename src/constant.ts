@@ -119,7 +119,7 @@ export const constants: { [key in ConstantKey]: Constant } = {
   },
   Mi: {
     value: 2 ** 20,
-    description: ["1メビ, 2 ** 20"],
+    description: ["1メビ 2 ** 20"],
   },
   Gi: {
     value: 2 ** 30,

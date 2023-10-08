@@ -46,7 +46,7 @@ export const dateFuncs: { [key in DateFunctionKey]: CalcFunction } = {
     funcs: {
       0: () => Date.now(),
     },
-    description: ["now() time()のエイリアス"],
+    description: ["now() 現在のUNIX時間[ミリ秒]"],
   },
   calendar_j2g: {
     funcs: {

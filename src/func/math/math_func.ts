@@ -11,6 +11,9 @@ import {
 
 export type MathFunctionKey =
   | "log"
+  | "ln"
+  | "log10"
+  | "log2"
   | "rand"
   | "fact"
   | "sin"
@@ -32,7 +35,6 @@ export type MathFunctionKey =
 export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
   log: {
     funcs: {
-      0: () => Math.LOG10E,
       1: (n) => Math.log10(parseNum(n)),
       2: (a, b) => {
         if (Math.log(parseNum(b)) === 0) {
@@ -42,10 +44,27 @@ export const mathFuncs: { [key in MathFunctionKey]: CalcFunction } = {
       },
     },
     description: [
-      "1. log() 常用対数",
-      "2. log(n) nの常用対数",
-      "3. log(a, b) bを底とするaの対数",
+      "1. log(n) 10を底とするnの対数",
+      "2. log(a, b) bを底とするaの対数",
     ],
+  },
+  ln: {
+    funcs: {
+      1: (n) => Math.log(parseNum(n)),
+    },
+    description: ["ln(n) ネイピア数eを底とするnの対数"],
+  },
+  log10: {
+    funcs: {
+      1: (n) => Math.log10(parseNum(n)),
+    },
+    description: ["log10(n) 10を底とするnの対数"],
+  },
+  log2: {
+    funcs: {
+      1: (n) => Math.log2(parseNum(n)),
+    },
+    description: ["log2() 2を底とするnの対数"],
   },
   rand: {
     funcs: {
