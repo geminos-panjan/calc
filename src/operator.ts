@@ -3,7 +3,7 @@ import { parseNum } from "./func/calc_func.js";
 import { ASTNodeValue } from "./parsing/parsing_syntax.js";
 
 export type TermOperatorKey = "+" | "-";
-export type FactorOperatorKey = "*" | "/" | "%";
+export type FactorOperatorKey = "*" | "/" | "%" | "\\" | "//";
 export type UnaryOperatorKey = "+" | "-" | "~";
 export type ShiftOperatorKey = "<<" | ">>";
 export type ExponentOperatorKey = "**";
@@ -34,6 +34,8 @@ export const operators: OperatorKey[] = [
   "&",
   "^",
   "|",
+  "\\",
+  "//",
 ];
 
 export const termOperators: {
@@ -65,6 +67,22 @@ export const factorOperators: {
       throw new ZeroDivisionError();
     }
     return n % m;
+  },
+  "\\": (a, b) => {
+    const n = parseNum(a);
+    const m = parseNum(b);
+    if (n === 0) {
+      throw new ZeroDivisionError();
+    }
+    return m / n;
+  },
+  "//": (a, b) => {
+    const n = parseNum(a);
+    const m = parseNum(b);
+    if (m === 0) {
+      throw new ZeroDivisionError();
+    }
+    return Math.floor(n / m);
   },
 };
 

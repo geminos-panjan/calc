@@ -60,7 +60,7 @@ export const tokenParsers: TokenParser[] = [
   { pattern: /[\d_]+/, type: "INTEGER" },
   { pattern: /[\+\-]/, type: "TERM_OPERATOR" },
   { pattern: /\*\*/, type: "EXPONENT_OPERATOR" },
-  { pattern: /[\*\/%]/, type: "FACTOR_OPERATOR" },
+  { pattern: /(\/\/|[\*\/%\\])/, type: "FACTOR_OPERATOR" },
   { pattern: /\(/, type: "OPEN_PAREN" },
   { pattern: /\)/, type: "CLOSE_PAREN" },
   { pattern: /,/, type: "COMMA" },
