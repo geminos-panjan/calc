@@ -74,8 +74,12 @@ export const stringFuncs: { [key in StringFunctionKey]: CalcFunction } = {
   space: {
     funcs: {
       1: (s) => [...parseString(s)].join("\u3000"),
+      2: (s1, s2) => [...parseString(s1)].join(parseString(s2)),
     },
-    description: ['space("s") 全角スペースを挿入'],
+    description: [
+      '1. space("s") sの文字間に全角スペースを挿入',
+      '2. space("s1", "s2") s1の文字間にs2を挿入',
+    ],
   },
   sudden: {
     funcs: {
